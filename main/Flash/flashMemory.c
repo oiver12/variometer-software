@@ -1,7 +1,6 @@
 #include "flashMemory.h"
-#include "esp_system.h"
-#include "nvs_flash.h"
-#include "nvs.h"
+#include <nvs_flash.h>
+#include <nvs.h>
 
 nvs_handle_t nvsHandle;
 

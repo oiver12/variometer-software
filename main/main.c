@@ -15,7 +15,7 @@
 #include "Flash/flashMemory.h"
 #include "AirspaceParcer/airspaceParcer.h"
 #include "MainTasks.h"
-#include "Bluetooth/bluetooth.h"
+//#include "Bluetooth/bluetooth.h"
 #include "ErrorHandling.h"
 #include "Sensor/I2C_Manager.h"
 
@@ -126,7 +126,7 @@ void app_main(void)
 
     StartAirspaceParse();
 
-    startBluetooth();
+    //startBluetooth();
 
     vTaskDelay(100 / portTICK_PERIOD_MS);
     i2c_manager_init(I2C_NUM_0, I2C_SDA, I2C_SCL, I2C_MASTER_FREQ_HZ);
