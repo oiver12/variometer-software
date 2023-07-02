@@ -1,11 +1,12 @@
 #include "Widget_Vario.h"
 #include "E_Ink/GUI_Paint.h"
 #include "DeviceContext.h"
+#include "ScreenManager.h"
+#include "ErrorHandling.h"
+
 #include <stdio.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/timers.h>
-#include "ScreenManager.h"
-#include "ErrorHandling.h"
 
 extern unsigned char gImage_gps_an[78];
 TimerHandle_t popUpTimer = NULL;

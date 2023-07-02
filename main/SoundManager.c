@@ -1,12 +1,13 @@
 #include "SoundManager.h"
-#include "driver/i2s.h"
+#include "DeviceContext.h"
+#include "Watchdog/Watchdog.h"
+#include "ErrorHandling.h"
+
+#include <driver/i2s.h>
 #include <math.h>
 #include <string.h>
 #include <driver/gpio.h>
-#include "DeviceContext.h"
 #include <esp_log.h>
-#include "Watchdog/Watchdog.h"
-#include "ErrorHandling.h"
 
 #define BUFF_SIZE 2048
 #define PDM_TX_FREQ_HZ 44100 // I2S PDM TX frequency

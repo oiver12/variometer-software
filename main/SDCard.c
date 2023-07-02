@@ -1,13 +1,14 @@
 #include "SDCard.h"
+#include "DeviceContext.h"
+
+#include <unistd.h>
 #include <sys/stat.h>
-#include "esp_vfs_fat.h"
+#include <esp_vfs_fat.h>
 #include <esp_log.h>
 #include <string.h>
-#include "driver/sdmmc_host.h"
+#include <driver/sdmmc_host.h>
 #include <errno.h>
 #include <dirent.h>
-#include "DeviceContext.h"
-#include <unistd.h>
 #include <libgen.h>
 
 static const char *TAG = "SDCard";
@@ -45,7 +46,7 @@ esp_err_t init_sdcard(const char *Mount_Point)
         .max_files = 8,
         .allocation_unit_size = 512}; // 512 bytes is standard can't be changed
     sdmmc_card_t *card;
-    // TODO: try 40MHz instead of 40 MHz
+    // TODO: try 40MHz instead of 20 MHz
     sdmmc_host_t host = SDMMC_HOST_DEFAULT();
 
     sdmmc_slot_config_t slot_config = SDMMC_SLOT_CONFIG_DEFAULT();

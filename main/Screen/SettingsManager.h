@@ -2,6 +2,7 @@
 #define __SETTINGSMANAGER_C
 
 #include "Widget_Vario.h"
+
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
 #include <esp_err.h>

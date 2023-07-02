@@ -1,7 +1,8 @@
 #include "AGL.h"
+#include "DeviceContext.h"
+
 #include <esp_log.h>
 #include <string.h>
-#include "DeviceContext.h"
 #include <math.h>
 
 static const char* directory = "/AGL";

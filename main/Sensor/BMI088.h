@@ -1,12 +1,12 @@
 #ifndef BMI088_SPI_DRIVER_H
 #define BMI088_SPI_DRIVER_H
 
+#include "vario_config.h"
+
 #include <freertos/FreeRTOS.h>
+#include <freertos/semphr.h>
 #include <esp_err.h>
 #include <driver/i2c.h>
-#include "driver/gpio.h"
-#include "freertos/semphr.h"
-#include "vario_config.h"
 
 typedef enum
 {

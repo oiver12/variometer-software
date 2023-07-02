@@ -1,13 +1,14 @@
 #include "QMC588L.h"
-#include <esp_log.h>
-#include <freertos/FreeRTOS.h>
-#include <freertos/task.h>
 #include "Screen/ScreenManager.h"
 #include "Flash/flashMemory.h"
-#include <esp_timer.h>
 #include "ErrorHandling.h"
 #include "vario_config.h"
 #include "I2C_Manager.h"
+
+#include <esp_timer.h>
+#include <esp_log.h>
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
 
 #define I2C_MASTER_TIMEOUT_MS 1000
 

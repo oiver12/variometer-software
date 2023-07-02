@@ -1,11 +1,12 @@
 ﻿#ifndef __DEVICE_CONTEXT_H
 #define __DEVICE_CONTEXT_H
 
-#include <stdint.h>
-#include <stdbool.h>
 #include "Screen/FIFO.h"
 #include "nmea_parser.h"
 #include "AirspaceParcer/airspaceParcer.h"
+
+#include <stdint.h>
+#include <stdbool.h>
 
 /*
  * Speicher für alle Device Information. Auf diese können alle zugreifen (z.B. wird vertVel gespeichert, welche vom Bildschirm gelesen wird und

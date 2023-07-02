@@ -1,11 +1,12 @@
 ﻿#ifndef __WIDGETVARIO_H
 #define __WIDGETVARIO_H
 
-#include <stdint.h>
 #include "FIFO.h"
+#include "DeviceContext.h"
+
+#include <stdint.h>
 #include <stdio.h>
 #include <esp_err.h>
-#include "DeviceContext.h"
 
 #define ChartNumDataPoints 20
 

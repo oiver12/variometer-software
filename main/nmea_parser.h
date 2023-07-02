@@ -11,11 +11,11 @@ extern "C"
 {
 #endif
 
-#include "esp_types.h"
-#include "esp_event.h"
-#include "esp_err.h"
-#include "driver/uart.h"
 #include "vario_config.h"
+
+#include <esp_event.h>
+#include <esp_err.h>
+#include <driver/uart.h>
 
 #define GPS_MAX_SATELLITES_IN_USE (12)
 #define GPS_MAX_SATELLITES_IN_VIEW (16)

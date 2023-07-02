@@ -1,13 +1,14 @@
 ﻿#include "DeviceContext.h"
-#include <math.h>
-#include "freertos/FreeRTOS.h"
-#include "freertos/semphr.h"
 #include "SoundManager.h"
 #include "Screen/Widget_Vario.h"
 #include "Util.h"
-#include <esp_timer.h>
 #include "Screen/ScreenManager.h"
 #include "FlightState.h"
+
+#include <esp_timer.h>
+#include <math.h>
+#include <freertos/FreeRTOS.h>
+#include <freertos/semphr.h>
 
 #define RADIUS (6371000) // 6371e3
 

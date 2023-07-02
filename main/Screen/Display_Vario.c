@@ -1,19 +1,19 @@
 #include "Display_Vario.h"
-#include "esp_heap_caps.h"
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
 #include "DeviceContext.h"
 #include "ScreenManager.h"
-#include <esp_log.h>
-#include <esp_timer.h>
 #include "E_Ink/EPD_3in7.h"
-#include "driver/spi_master.h"
-#include "driver/gpio.h"
-#include <inttypes.h>
 #include "E_Ink/GUI_Paint.h"
 #include "RenderSystem.h"
 #include "Screen/assets/assets.h"
 #include "ErrorHandling.h"
+
+#include <esp_log.h>
+#include <esp_heap_caps.h>
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
+#include <driver/spi_master.h>
+#include <driver/gpio.h>
+#include <inttypes.h>
 
 #define DISP_BUF_SIZE 16800
 #define TAG "DISPLAY_VARIO"

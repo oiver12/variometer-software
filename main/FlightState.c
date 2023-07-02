@@ -1,11 +1,12 @@
 #include "FlightState.h"
-#include <esp_timer.h>
 #include "Util.h"
-#include <stdlib.h>
 #include "DeviceContext.h"
 #include "Screen/Widget_Vario.h"
 #include "SoundManager.h"
 #include "Screen/ScreenManager.h"
+
+#include <stdlib.h>
+#include <esp_timer.h>
 
 #define CIRCLING_HEADING_THRESHOLD 10
 #define CIRCLING_EXIT_COUNT 3

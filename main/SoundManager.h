@@ -1,11 +1,9 @@
 #ifndef SOUNDMANAGER_VARIO_H
 #define SOUNDMANAGER_VARIO_H
 
-#include <esp_err.h>
-#include <freertos/FreeRTOS.h>
-#include "freertos/semphr.h"
 #include "main.h"
-#include "esp_event.h"
+
+#include <esp_err.h>
 
 typedef enum
 {

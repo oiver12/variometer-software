@@ -2,14 +2,15 @@
 #include "E_Ink/EPD_3in7.h"
 #include "E_Ink/GUI_Paint.h"
 #include "ScreenManager.h"
-#include <freertos/FreeRTOS.h>
-#include <freertos/task.h>
-#include <freertos/semphr.h>
-#include <esp_log.h>
 #include "SoundManager.h"
 #include "Watchdog/Watchdog.h"
 #include "ErrorHandling.h"
 #include "vario_config.h"
+
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
+#include <freertos/semphr.h>
+#include <esp_log.h>
 
 RenderModes_t currentRenderMode = RenderMode_Update;
 bool isSending = false;

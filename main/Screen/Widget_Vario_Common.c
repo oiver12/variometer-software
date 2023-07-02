@@ -1,4 +1,5 @@
 #include "Widget_Vario_Common.h"
+
 #include <stdio.h>
 
 static uint16_t getTextWidth(const char* pString, sFONT* font)

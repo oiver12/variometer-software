@@ -8,8 +8,9 @@
  */
 
 #include "Widget_Vario.h"
-#include "freertos/FreeRTOS.h"
-#include "freertos/semphr.h"
+
+#include <freertos/FreeRTOS.h>
+#include <freertos/semphr.h>
 
 #define MAX_SCREENS 5
 #define MAX_WIDGETS_SCREEN 10

@@ -1,11 +1,12 @@
 ﻿#include "Widget_Vario.h"
 #include "DeviceContext.h"
-#include <stdio.h>
-#include <math.h>
-#include <time.h>
 #include "E_Ink/GUI_Paint.h"
 #include "Widget_Vario_Common.h"
 #include "assets/assets.h"
+
+#include <stdio.h>
+#include <math.h>
+#include <time.h>
 
 #define BUFFER_TEXT_SIZE 20
 #define Compass_Method1

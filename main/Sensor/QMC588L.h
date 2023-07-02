@@ -1,9 +1,10 @@
 #ifndef QMC588L_I2C_DRIVER
 #define QMC588L_I2C_DRIVER
 
-#include <esp_err.h>
-#include <stdbool.h>
 #include "Screen/Widget_Vario.h"
+
+#include <stdbool.h>
+#include <esp_err.h>
 #include <driver/i2c.h>
 
 typedef enum

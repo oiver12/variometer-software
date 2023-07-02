@@ -1,12 +1,13 @@
 #include "FlightLogger.h"
+#include "nmea_parser.h"
+#include "DeviceContext.h"
+#include "vario_config.h"
+
+#include <string.h>
+#include <esp_timer.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include <esp_log.h>
-#include "nmea_parser.h"
-#include <string.h>
-#include "DeviceContext.h"
-#include "vario_config.h"
-#include <esp_timer.h>
 
 bool sdCard_init = false;
 static const char *TAG = "FlightLogger";

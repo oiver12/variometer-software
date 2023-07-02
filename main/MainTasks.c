@@ -1,22 +1,23 @@
 #include "MainTasks.h"
-#include <freertos/FreeRTOS.h>
-#include <freertos/task.h>
-#include <freertos/semphr.h>
-#include <freertos/timers.h>
 #include "Sensor/BMI088.h"
 #include "Sensor/DPS310.h"
 #include "QuaternionFilter.h"
 #include "Kalman/kalman.h"
 #include "Sensor/QMC588L.h"
-#include <math.h>
 #include "DeviceContext.h"
 #include "SoundManager.h"
 #include "TestTools/FlightLogger.h"
-#include <esp_log.h>
-#include <esp_timer.h>
 #include "Watchdog/Watchdog.h"
 #include "ErrorHandling.h"
 #include "vario_config.h"
+
+#include <esp_log.h>
+#include <esp_timer.h>
+#include <math.h>
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
+#include <freertos/semphr.h>
+#include <freertos/timers.h>
 
 #define i2c_master_port 0
 #define PresSens_INT 38

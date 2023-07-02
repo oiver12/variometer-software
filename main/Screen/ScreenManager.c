@@ -1,16 +1,17 @@
 ﻿#include "ScreenManager.h"
-#include <stdio.h>
 #include "E_Ink/GUI_Paint.h"
-#include <string.h>
-#include <math.h>
 #include "DeviceContext.h"
-#include "esp_sleep.h"
-#include "driver/gpio.h"
 #include "Display_Vario.h"
 #include "RenderSystem.h"
 #include "assets/assets.h"
 #include "SettingsManager.h"
 #include "ErrorHandling.h"
+
+#include <stdio.h>
+#include <string.h>
+#include <math.h>
+#include <esp_sleep.h>
+#include <driver/gpio.h>
 
 Vario_Screen_Manager_t screenManagerInstance;
 static SemaphoreHandle_t buffer_Mutex = NULL;

@@ -4,6 +4,7 @@
 #include "SDCard.h"
 #include "../main.h"
 #include "nmea_parser.h"
+
 #include <esp_err.h>
 
 void initLogging(nmea_parser_handle_t nmea_parser_handle);

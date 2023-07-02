@@ -1,10 +1,11 @@
 #include "BatteryManager.h"
-#include "driver/gpio.h"
-#include <esp_log.h>
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
 #include "DeviceContext.h"
 #include "ErrorHandling.h"
+
+#include <driver/gpio.h>
+#include <esp_log.h>
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
 
 #define BAT_MS 3
 
