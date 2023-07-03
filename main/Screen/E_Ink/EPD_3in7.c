@@ -29,7 +29,7 @@
 #
 ******************************************************************************/
 #include "EPD_3in7.h"
-#include "driver/spi_master.h"
+#include <driver/spi_master.h>
 #include <esp_log.h>
 #include <esp_timer.h>
 #include "ErrorHandling.h"
