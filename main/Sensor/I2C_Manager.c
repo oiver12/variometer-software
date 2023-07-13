@@ -1,3 +1,5 @@
+#ifndef ISSIMULATION
+
 #include "I2C_Manager.h"
 #include "ErrorHandling.h"
 #include <freertos/FreeRTOS.h>
@@ -87,3 +89,5 @@ end:
     xSemaphoreGive(local_mutex[port]);
     return err;
 }
+
+#endif

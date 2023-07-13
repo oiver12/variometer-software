@@ -136,7 +136,7 @@ static void calibrationTask(void *params)
     flashMemoryWriteInt32("MagCaliMinZ", qmc588l_data._vCalibration[2][0]);
     flashMemoryWriteInt32("MagCaliMaxZ", qmc588l_data._vCalibration[2][1]);
     vTaskDelay(100 / portTICK_PERIOD_MS);
-    ScreenManager_deselctSettingsWidget();
+    //    ScreenManager_deselctSettingsWidget();
     vTaskDelete(NULL);
 }
 

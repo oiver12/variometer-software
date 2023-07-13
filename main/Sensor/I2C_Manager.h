@@ -1,4 +1,5 @@
 #include <driver/i2c.h>
+#include <stddef.h>
 
 esp_err_t i2c_manager_init(i2c_port_t port, gpio_num_t SDA, gpio_num_t SCL, uint32_t clockFrequency);
 esp_err_t i2c_manager_writeByte(i2c_port_t port, uint8_t deviceAddr, uint8_t regAddr, const uint8_t data);

@@ -7,6 +7,7 @@
 #include <freertos/semphr.h>
 #include <esp_err.h>
 #include <driver/i2c.h>
+#include <stdbool.h>
 
 typedef enum
 {

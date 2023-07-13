@@ -2,18 +2,19 @@
 #define DPS310_SPI_DRIVER_H
 
 #include <esp_err.h>
+#include <stdint.h>
 
 typedef struct
 {
     int32_t m_c0Half;
-    int32_t m_c1; 
+    int32_t m_c1;
     int32_t m_c00;
-	int32_t m_c10;
-	int32_t m_c01;
-	int32_t m_c11;
-	int32_t m_c20;
-	int32_t m_c21;
-	int32_t m_c30;
+    int32_t m_c10;
+    int32_t m_c01;
+    int32_t m_c11;
+    int32_t m_c20;
+    int32_t m_c21;
+    int32_t m_c30;
 } dsp310_config_data_t;
 
 typedef enum
@@ -40,7 +41,7 @@ typedef enum
     DPS310_OSR_128 = 7,
 } dps310_osr_t;
 
-typedef struct 
+typedef struct
 {
     int I2C_Master_Num;
     uint8_t dps310_t_i2c_addr;

@@ -15,9 +15,11 @@
 #include "Flash/flashMemory.h"
 #include "AirspaceParcer/airspaceParcer.h"
 #include "MainTasks.h"
-//#include "Bluetooth/bluetooth.h"
+// #include "Bluetooth/bluetooth.h"
 #include "ErrorHandling.h"
 #include "Sensor/I2C_Manager.h"
+
+#include <driver/gpio.h>
 
 #define POWSW_ENABLE 13
 
@@ -126,12 +128,16 @@ void app_main(void)
 
     StartAirspaceParse();
 
-    //startBluetooth();
+    // startBluetooth();
 
     vTaskDelay(100 / portTICK_PERIOD_MS);
     i2c_manager_init(I2C_NUM_0, I2C_SDA, I2C_SCL, I2C_MASTER_FREQ_HZ);
     startMainTasks();
     // xTaskCreate(sendAttitude, "Send Attitude", 4 * 1024, NULL, 6, NULL);
     // perfmon_start();
+    while (1)
+    {
+        vTaskDelay(10000 / portTICK_PERIOD_MS);
+    }
     return;
 }

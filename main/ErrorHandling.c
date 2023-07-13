@@ -1,7 +1,7 @@
 #include "ErrorHandling.h"
 #include <esp_log.h>
 
-const char *TAG = "ERROR HANDLER";
+static const char *TAG = "ERROR HANDLER";
 
 void error_handle(esp_err_t err, error_location location, char *message)
 {

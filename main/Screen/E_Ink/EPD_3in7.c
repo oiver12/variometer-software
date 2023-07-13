@@ -232,8 +232,10 @@ static void IRAM_ATTR gpio_busy_isr_handler(void *arg)
     BaseType_t HPTaskWoken = pdFALSE;
     // unblock TaskMeasureAcc
     vTaskNotifyGiveFromISR(taskHandle, &HPTaskWoken);
+#ifndef ISSIMULATION
     if (HPTaskWoken == pdTRUE)
         portYIELD_FROM_ISR();
+#endif
 }
 
 static void EPD_3IN7_ReadBusy_HIGH(void)

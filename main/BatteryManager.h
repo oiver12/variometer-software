@@ -4,8 +4,10 @@
 #include <esp_adc/adc_oneshot.h>
 #include <esp_adc/adc_cali.h>
 #include <esp_adc/adc_cali_scheme.h>
+#include <stdbool.h>
 
-typedef struct{
+typedef struct
+{
     int oversampling;
     float voltage;
     float percentage;

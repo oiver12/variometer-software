@@ -4,6 +4,7 @@
 #include <math.h>
 #include "DeviceContext.h"
 #include <esp_timer.h>
+#include "ErrorHandling.h"
 
 #define IGC_HEADER_DATE (2)
 #define IGC_HEADER_PILOT (4)
@@ -199,8 +200,17 @@ static void igcLogget_Task(void *params)
 			.callback = &logICGSentence,
 			.name = "periodicIGC"};
 		esp_timer_handle_t periodic_timer;
-		ESP_ERROR_CHECK(esp_timer_create(&periodic_timer_args, &periodic_timer));
-		ESP_ERROR_CHECK(esp_timer_start_periodic(periodic_timer, 1000000));
+		esp_err_t err = esp_timer_create(&periodic_timer_args, &periodic_timer);
+		if (err != ESP_OK)
+		{
+			error_handle(err, ERR_SCREEN, "Can't initizialize timer for logging");
+		}
+		else
+		{
+			err = esp_timer_start_periodic(periodic_timer, 1000000);
+			if (err != ESP_OK)
+				error_handle(err, ERR_SCREEN, "Can't start periodic timer");
+		}
 	}
 	vTaskDelete(NULL);
 }

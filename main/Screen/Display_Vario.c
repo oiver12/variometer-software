@@ -42,6 +42,7 @@ esp_err_t init_Display()
         .quadhd_io_num = -1,
         .max_transfer_sz = 4092};
     esp_err_t err = ESP_OK;
+#ifndef ISSIMULATION
     ERROR_RETRYTIMES(spi_bus_initialize(SPI2_HOST, &spi2cfg, SPI_DMA_CH_AUTO), VARIO_SPI_RETRYS_INIT, err);
     if (err != ESP_OK)
     {
@@ -69,7 +70,7 @@ esp_err_t init_Display()
         error_handle(err, ERR_SCREEN, "Can't clear Screen");
         return err;
     }
-
+#endif
     ESP_LOGI(TAG, "Screen initialized");
     if ((ScreenBuffer = (uint8_t *)heap_caps_malloc(DISP_BUF_SIZE, MALLOC_CAP_DMA)) == NULL)
     {

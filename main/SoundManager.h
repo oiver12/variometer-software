@@ -4,6 +4,8 @@
 #include "main.h"
 
 #include <esp_err.h>
+#include <stddef.h>
+#include <stdint.h>
 
 typedef enum
 {

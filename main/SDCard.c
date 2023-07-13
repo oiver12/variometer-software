@@ -1,3 +1,5 @@
+#ifndef ISSIMULATION
+
 #include "SDCard.h"
 #include "DeviceContext.h"
 
@@ -237,3 +239,5 @@ esp_err_t GetFlights(int startIndex, widget_Settings_linkedList *flightListHead)
     }
     return ESP_OK;
 }
+
+#endif

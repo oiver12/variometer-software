@@ -8,6 +8,8 @@
 #include <string.h>
 #include <driver/gpio.h>
 #include <esp_log.h>
+#include <freertos/FreeRTOS.h>
+#include <freertos/queue.h>
 
 #define BUFF_SIZE 2048
 #define PDM_TX_FREQ_HZ 44100 // I2S PDM TX frequency

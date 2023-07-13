@@ -12,6 +12,8 @@
 #include <freertos/semphr.h>
 #include <esp_log.h>
 
+extern void simulationDisplayTask(void *arg);
+
 RenderModes_t currentRenderMode = RenderMode_Update;
 bool isSending = false;
 bool fullRedraw = true;
@@ -98,7 +100,15 @@ esp_err_t startRendering(uint8_t *ScreenBuffer)
     renderQueue = xQueueCreate(1, sizeof(Display_RefreshMode));
 
     xTaskCreate(rendering_Task, "rendering_Task", 4096, NULL, 10, NULL);
+#ifndef ISSIMULATION
     xTaskCreate(displayRefreshTask, "displayRefreshTask", 4096, ScreenBuffer, 10, NULL);
+#else
+    static ScreenRender_arg arguments;
+    arguments.buffer_Mutex = buffer_Mutex;
+    arguments.renderQueue = renderQueue;
+    arguments.ScreenBuffer = ScreenBuffer;
+    xTaskCreate(simulationDisplayTask, "displayRefreshTask", 4096, &arguments, 10, NULL);
+#endif
     displayInit = true;
     return ESP_OK;
 }

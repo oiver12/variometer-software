@@ -37,8 +37,8 @@ static esp_err_t str2int(int *out, const char *s)
 
 static void sliceString(const char *oldString, char *newString, int start, int size)
 {
-    strlcpy(newString, &oldString[start], size);
-    // strncpy(newString, &oldString[start], size);
+    // strlcpy(newString, &oldString[start], size);
+    strncpy(newString, &oldString[start], size);
 }
 
 static esp_err_t sliceStringToInt(int *out, const char *stringIn, int start, int size)

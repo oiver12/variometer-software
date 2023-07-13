@@ -193,7 +193,7 @@ void ScreenManager_powerButtonPressed(bool longPress)
     else
     {
         // PowerOff
-        ESP_ERROR_CHECK(esp_sleep_enable_ext0_wakeup(2, 0));
+        ERROR_CHECKRETURN(esp_sleep_enable_ext0_wakeup(2, 0));
         Display_powerOff_Screen();
         gpio_set_level(13, 0);
         vTaskDelay(500 / portTICK_PERIOD_MS);

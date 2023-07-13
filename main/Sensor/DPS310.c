@@ -1,3 +1,5 @@
+#ifndef ISSIMULATION
+
 #include "DPS310.h"
 #include "I2C_Manager.h"
 #include "ErrorHandling.h"
@@ -178,3 +180,5 @@ esp_err_t dps310_get_Temperature(dps310_t *dev)
     dev->Temperature = temp;
     return ESP_OK;
 }
+
+#endif

@@ -49,8 +49,10 @@ static void IRAM_ATTR dps310ISR(void *arg)
     BaseType_t HPTaskWoken = pdFALSE;
     // unblock TaskMeasureAcc
     vTaskNotifyGiveFromISR((TaskHandle_t)arg, &HPTaskWoken);
+#ifndef ISSIMULATION
     if (HPTaskWoken == pdTRUE)
         portYIELD_FROM_ISR();
+#endif
 }
 
 static void TaskMeasureHeight(void *parameters)
