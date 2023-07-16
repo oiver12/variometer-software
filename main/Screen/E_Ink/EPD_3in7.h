@@ -31,6 +31,8 @@
 #ifndef __EPD_3IN7_H_
 #define __EPD_3IN7_H_
 
+#include "pinDefines.h"
+
 #include <stdio.h>
 #include <driver/gpio.h>
 #include <freertos/FreeRTOS.h>
@@ -51,16 +53,6 @@ typedef enum
     PART_G_T_BW, // LUT2 (1Gray_DU): Part Dispaly Update from GS to B/W (=0.797s)
     PART_BW_T_BW // LUT3 (1Gray_A2): Part Display Update from B/W to B/W (=0.397s)
 } Display_RefreshMode;
-
-/**
- * e-Paper GPIO
- **/
-#define EPD_RST_PIN 45
-#define EPD_DC_PIN 42
-#define EPD_CS_PIN 39
-#define EPD_BUSY_PIN 40
-#define EPD_MOSI_PIN 41
-#define EPD_CLK_PIN 46
 
 /**
  * GPIO read and write
@@ -91,7 +83,7 @@ esp_err_t EPD_3IN7_1Gray_Display(const UBYTE *Image, Display_RefreshMode refresh
 esp_err_t EPD_3IN7_1Gray_Display_Part(const UBYTE *PartBuffer, UWORD Xstart, UWORD Ystart, UWORD Xend, UWORD Yend, Display_RefreshMode refreshMode);
 esp_err_t EPD_3IN7_1Gray_Display_Part_FullScreenBuffer(const UBYTE *Image, UWORD Xstart, UWORD Ystart, UWORD Xend, UWORD Yend, Display_RefreshMode refreshMode);
 esp_err_t EDP_3IN7_1Gray_Start(const UBYTE *Image, Display_RefreshMode refreshMode);
-void EPD_3IN7_1Gray_WaitBusy();
+esp_err_t EPD_3IN7_1Gray_WaitBusy();
 
 void EPD_3IN7_Sleep(void);
 

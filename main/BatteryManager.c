@@ -1,13 +1,12 @@
 #include "BatteryManager.h"
 #include "DeviceContext.h"
 #include "ErrorHandling.h"
+#include "pinDefines.h"
 
 #include <driver/gpio.h>
 #include <esp_log.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
-
-#define BAT_MS 3
 
 #define maxVoltage 4 // nicht 4.2, weil der ESP nur bis 3.1V und nicht bis 3.3v lesen kann
 #define minVoltage 3.3
@@ -97,13 +96,13 @@ esp_err_t init_Battery_Manager(int oversampling)
 {
     //-------------ADC2 Init---------------//
     adc_oneshot_unit_init_cfg_t init_config2 = {
-        .unit_id = ADC_UNIT_2,
+        .unit_id = BAT_ADCUNIT,
         .ulp_mode = ADC_ULP_MODE_DISABLE,
     };
     ERROR_CHECKRETURN(adc_oneshot_new_unit(&init_config2, &battery_Manager.unit_handle));
 
     //-------------ADC2 Calibration Init---------------//
-    esp_err_t err = adc_calibration_init(ADC_UNIT_2, ADC_ATTEN_DB_11);
+    esp_err_t err = adc_calibration_init(BAT_ADCUNIT, ADC_ATTEN_DB_11);
     battery_Manager.cali_enable = (err == ESP_OK);
     if (err != ESP_OK)
     {
@@ -114,7 +113,7 @@ esp_err_t init_Battery_Manager(int oversampling)
         .bitwidth = ADC_BITWIDTH_DEFAULT,
         .atten = ADC_ATTEN_DB_11,
     };
-    ERROR_CHECKRETURN(adc_oneshot_config_channel(battery_Manager.unit_handle, ADC_CHANNEL_3, &config));
+    ERROR_CHECKRETURN(adc_oneshot_config_channel(battery_Manager.unit_handle, BAT_ADCCHANNEL, &config));
 
     battery_Manager.oversampling = oversampling;
 

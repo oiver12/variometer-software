@@ -46,7 +46,8 @@ typedef enum error_location
     ERR_NMEA,
     ERR_SDCARD,
     ERR_SOUNDMANAGER,
-    ERR_LOGGING
+    ERR_LOGGING,
+    ERR_WATCHDOG
 } error_location;
 
 void error_handle(esp_err_t err, error_location location, char *message);

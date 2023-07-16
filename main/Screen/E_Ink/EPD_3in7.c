@@ -98,7 +98,7 @@ static const UBYTE lut_1Gray_A2[] =
 esp_err_t EPD_3IN7_SPI_Init()
 {
     spi_device_interface_config_t devcfg = {
-        .clock_speed_hz = 20 * 1000 * 1000, // Clock out at 10 MHz
+        .clock_speed_hz = 10 * 1000 * 1000, // Clock out at 10 MHz
         .mode = 0,                          // SPI mode 0
         .spics_io_num = EPD_CS_PIN,         // CS pin
         .queue_size = 7,                    // We want to be able to queue 7 transactions at a time
@@ -238,15 +238,24 @@ static void IRAM_ATTR gpio_busy_isr_handler(void *arg)
 #endif
 }
 
-static void EPD_3IN7_ReadBusy_HIGH(void)
+static esp_err_t EPD_3IN7_ReadBusy_HIGH(void)
 {
     gpio_isr_handler_add((gpio_num_t)EPD_BUSY_PIN, gpio_busy_isr_handler, xTaskGetCurrentTaskHandle());
+    uint64_t startTime = esp_timer_get_time();
     uint32_t notificationValue = ulTaskNotifyTake(pdTRUE, 5000 / portTICK_PERIOD_MS);
+    esp_err_t err = ESP_OK;
     if (notificationValue == 0)
     {
         ESP_LOGW("EPD", "Interrupt didn't fire");
+        err = ESP_ERR_TIMEOUT;
+    }
+    else
+    {
+        ESP_LOGI("EPD", "Interrupt did fire: %i ms", (int)(esp_timer_get_time() - startTime) / 1000);
+        err = ESP_OK;
     }
     gpio_isr_handler_remove(EPD_BUSY_PIN);
+    return err;
 }
 
 /******************************************************************************
@@ -369,12 +378,12 @@ esp_err_t EPD_3IN7_1Gray_Init(void)
     err |= EPD_3IN7_SendCommand(0x46);
     err |= EPD_3IN7_SendData(0xF7);
     ERROR_CHECKRETURN(err);
-    EPD_3IN7_ReadBusy_HIGH();
+    ERROR_CHECKRETURN(EPD_3IN7_ReadBusy_HIGH());
 
     err |= EPD_3IN7_SendCommand(0x47);
     err |= EPD_3IN7_SendData(0xF7);
     ERROR_CHECKRETURN(err);
-    EPD_3IN7_ReadBusy_HIGH();
+    ERROR_CHECKRETURN(EPD_3IN7_ReadBusy_HIGH());
 
     err |= EPD_3IN7_SendCommand(0x01); // setting gaet number
     err |= EPD_3IN7_SendData(0xDF);
@@ -497,7 +506,7 @@ esp_err_t EPD_3IN7_4Gray_Clear(void)
 
     err |= EPD_3IN7_SendCommand(0x20);
     ERROR_CHECKRETURN(err);
-    EPD_3IN7_ReadBusy_HIGH();
+    ERROR_CHECKRETURN(EPD_3IN7_ReadBusy_HIGH());
 
     printf("Update Time: %llu \n\r", (esp_timer_get_time() - startTime) / 1000);
     return err;
@@ -532,7 +541,7 @@ esp_err_t EPD_3IN7_1Gray_Clear(void)
 
     err |= EPD_3IN7_SendCommand(0x20);
     ERROR_CHECKRETURN(err);
-    EPD_3IN7_ReadBusy_HIGH();
+    ERROR_CHECKRETURN(EPD_3IN7_ReadBusy_HIGH());
     return err;
 }
 
@@ -656,7 +665,7 @@ esp_err_t EPD_3IN7_4Gray_Display(const UBYTE *Image)
     err |= EPD_3IN7_SendCommand(0x20);
 
     ERROR_CHECKRETURN(err);
-    EPD_3IN7_ReadBusy_HIGH();
+    ERROR_CHECKRETURN(EPD_3IN7_ReadBusy_HIGH());
     return err;
 }
 
@@ -686,7 +695,7 @@ esp_err_t EPD_3IN7_1Gray_Display(const UBYTE *Image, Display_RefreshMode refresh
     err |= EPD_3IN7_Load_LUT(refreshMode);
     err |= EPD_3IN7_SendCommand(0x20);
     ERROR_CHECKRETURN(err);
-    EPD_3IN7_ReadBusy_HIGH();
+    ERROR_CHECKRETURN(EPD_3IN7_ReadBusy_HIGH());
     return err;
 }
 
@@ -732,7 +741,7 @@ esp_err_t EPD_3IN7_1Gray_Display_Part(const UBYTE *PartBuffer, UWORD Xstart, UWO
     err |= EPD_3IN7_Load_LUT(refreshMode);
     err |= EPD_3IN7_SendCommand(0x20);
     ERROR_CHECKRETURN(err);
-    EPD_3IN7_ReadBusy_HIGH();
+    ERROR_CHECKRETURN(EPD_3IN7_ReadBusy_HIGH());
     return err;
 }
 
@@ -766,9 +775,9 @@ esp_err_t EDP_3IN7_1Gray_Start(const UBYTE *Image, Display_RefreshMode refreshMo
     err |= EPD_3IN7_SendCommand(0x20);
     return err;
 }
-void EPD_3IN7_1Gray_WaitBusy()
+esp_err_t EPD_3IN7_1Gray_WaitBusy()
 {
-    EPD_3IN7_ReadBusy_HIGH();
+    return EPD_3IN7_ReadBusy_HIGH();
 }
 
 /******************************************************************************

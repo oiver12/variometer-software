@@ -15,20 +15,12 @@
 #include "Flash/flashMemory.h"
 #include "AirspaceParcer/airspaceParcer.h"
 #include "MainTasks.h"
+#include "pinDefines.h"
 // #include "Bluetooth/bluetooth.h"
 #include "ErrorHandling.h"
 #include "Sensor/I2C_Manager.h"
 
 #include <driver/gpio.h>
-
-#define POWSW_ENABLE 13
-
-#define I2C_MASTER_FREQ_HZ 80000
-#define I2C_SDA 37
-#define I2C_SCL 36
-
-#define USART2_TX 17
-#define USART2_RX 18
 
 /* GPS */
 #define TIME_ZONE (+1)   // Schweiz
@@ -131,7 +123,12 @@ void app_main(void)
     // startBluetooth();
 
     vTaskDelay(100 / portTICK_PERIOD_MS);
+#ifdef VERSION2n2
     i2c_manager_init(I2C_NUM_0, I2C_SDA, I2C_SCL, I2C_MASTER_FREQ_HZ);
+#elif defined VERSION2n2n1
+    i2c_manager_init(I2C_NUM_0, I2C1_SDA, I2C1_SCL, I2C_MASTER_FREQ_HZ);
+    i2c_manager_init(I2C_NUM_1, I2C2_SDA, I2C2_SCL, I2C_MASTER_FREQ_HZ);
+#endif
     startMainTasks();
     // xTaskCreate(sendAttitude, "Send Attitude", 4 * 1024, NULL, 6, NULL);
     // perfmon_start();

@@ -11,8 +11,8 @@ void watchdog_init()
 
 void watchdog_add(TaskHandle_t task)
 {
-    ERROR_CHECKRETURN(esp_task_wdt_add(task));
-    ERROR_CHECKRETURN(esp_task_wdt_status(task));
+    ERROR_HANDLEBYERROR(esp_task_wdt_add(task), ERR_WATCHDOG, "Can't add Task to watchdog");
+    ERROR_HANDLEBYERROR(esp_task_wdt_status(task), ERR_WATCHDOG, "Task not added to Watchdog");
 }
 
 void watchdog_reset()
@@ -22,7 +22,7 @@ void watchdog_reset()
 
 void watchdog_delete(TaskHandle_t task)
 {
-    ERROR_CHECKRETURN(esp_task_wdt_delete(task));
+    ERROR_HANDLEBYERROR(esp_task_wdt_delete(task), ERR_WATCHDOG, "Task can't be deleted from Watchdog");
 }
 
 void watchdog_deinit()

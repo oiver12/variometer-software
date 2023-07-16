@@ -2,6 +2,8 @@
 
 #include "SDCard.h"
 #include "DeviceContext.h"
+#include "pinDefines.h"
+#include "ErrorHandling.h"
 
 #include <unistd.h>
 #include <sys/stat.h>
@@ -44,28 +46,29 @@ esp_err_t init_sdcard(const char *Mount_Point)
 
     esp_err_t ret;
     esp_vfs_fat_sdmmc_mount_config_t mount_config = {
-        .format_if_mount_failed = true,
+        .format_if_mount_failed = false,
         .max_files = 8,
         .allocation_unit_size = 512}; // 512 bytes is standard can't be changed
     sdmmc_card_t *card;
     // TODO: try 40MHz instead of 20 MHz
     sdmmc_host_t host = SDMMC_HOST_DEFAULT();
+    host.max_freq_khz = 400;
 
     sdmmc_slot_config_t slot_config = SDMMC_SLOT_CONFIG_DEFAULT();
     slot_config.width = 4;
-    slot_config.clk = 4;
-    slot_config.cmd = 5;
-    slot_config.d0 = 6;
-    slot_config.d1 = 7;
-    slot_config.d2 = 15;
-    slot_config.d3 = 16;
+    slot_config.clk = SD_CLK;
+    slot_config.cmd = SD_CMD;
+    slot_config.d0 = SD_D0;
+    slot_config.d1 = SD_D1;
+    slot_config.d2 = SD_D2;
+    slot_config.d3 = SD_D3;
     slot_config.flags |= SDMMC_SLOT_FLAG_INTERNAL_PULLUP;
 
     sd_card_state_t sdcard_state_vario; // for Vario State
     memset(&sdcard_state_vario, 0, sizeof(sd_card_state_t));
 
     ESP_LOGI(TAG, "Mounting filesystem");
-    ret = esp_vfs_fat_sdmmc_mount(Mount_Point, &host, &slot_config, &mount_config, &card);
+    ERROR_RETRYTIMES(esp_vfs_fat_sdmmc_mount(Mount_Point, &host, &slot_config, &mount_config, &card), 10, ret);
 
     if (ret != ESP_OK)
     {

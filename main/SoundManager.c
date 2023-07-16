@@ -2,6 +2,7 @@
 #include "DeviceContext.h"
 #include "Watchdog/Watchdog.h"
 #include "ErrorHandling.h"
+#include "pinDefines.h"
 
 #include <driver/i2s.h>
 #include <math.h>
@@ -15,12 +16,6 @@
 #define PDM_TX_FREQ_HZ 44100 // I2S PDM TX frequency
 #define I2S_NUM (0)
 #define VELOCITY_THRESHOLD 0.2
-
-#define I2S_BCLK 11
-#define I2S_LRCLK 12
-#define I2S_DIN 10
-#define AUDIO_EN 21
-#define AUDIO_GAIN 47
 
 #define Sound_Size_Queue 10
 
@@ -172,6 +167,7 @@ void SoundManager_calculateNewBiep()
 esp_err_t init_SoundManager()
 {
     esp_err_t err;
+#ifdef VERSION2n2
     gpio_config_t enableGPIOOutput = {
         .intr_type = GPIO_INTR_DISABLE,
         .mode = GPIO_MODE_OUTPUT,
@@ -182,6 +178,11 @@ esp_err_t init_SoundManager()
     gpio_config(&enableGPIOOutput);
 #ifdef SOUND_ON
     gpio_set_level(AUDIO_EN, 1);
+#endif
+#endif
+#ifndef SOUND_ON
+    ESP_LOGI(TAG, "Sound not on returning...");
+    return ESP_OK;
 #endif
     i2s_config_t i2s_config = {
         .mode = I2S_MODE_MASTER | I2S_MODE_TX,
@@ -229,7 +230,9 @@ esp_err_t init_SoundManager()
 
 esp_err_t deinit_SoundManager()
 {
+#ifdef VERSIOn2n2
     gpio_set_level(AUDIO_EN, 0);
+#endif
     free(soundManager_instance.ToneArray);
     free(buffer);
     return ESP_OK;
@@ -237,6 +240,9 @@ esp_err_t deinit_SoundManager()
 
 esp_err_t SoundManager_playToneArray(SoundManager_Tone_t *toneArray, size_t sizeToneArray)
 {
+#ifndef SOUND_ON
+    return ESP_OK;
+#endif
     for (size_t i = 0; i < sizeToneArray; i++)
     {
         BaseType_t returnValue = xQueueSend(soundQueue, &toneArray[i], 3);

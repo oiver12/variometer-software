@@ -10,6 +10,7 @@
 #include "Watchdog/Watchdog.h"
 #include "ErrorHandling.h"
 #include "vario_config.h"
+#include "pinDefines.h"
 
 #include <esp_log.h>
 #include <esp_timer.h>
@@ -18,9 +19,6 @@
 #include <freertos/task.h>
 #include <freertos/semphr.h>
 #include <freertos/timers.h>
-
-#define i2c_master_port 0
-#define PresSens_INT 38
 
 #define R_SPECIFIC 287.053
 #define GRAVITY_G 9.80665
@@ -62,7 +60,7 @@ static void TaskMeasureHeight(void *parameters)
     startTemperature = 0;
     dps310_t DPS310_Data;
     esp_err_t err;
-    ERROR_RETRYTIMES(dps310_init(&DPS310_Data, i2c_master_port, 0x76), VARIO_I2C_RETRYS_INIT, err);
+    ERROR_RETRYTIMES(dps310_init(&DPS310_Data, DPS310I2CPORT, 0x76), VARIO_I2C_RETRYS_INIT, err);
     if (err != ESP_OK)
     {
         // TODO: display these kinds of error messages
@@ -106,7 +104,7 @@ static void TaskMeasureHeight(void *parameters)
         error_handle(err, ERR_DPS310, "Can't start INT on DPS310 GPIO");
     }
     vTaskDelay(50 / portTICK_PERIOD_MS);
-    int count = 0;
+    int countTemperatureRead = 0;
     float lastPressure = startPressure;
     while (1)
     {
@@ -123,17 +121,17 @@ static void TaskMeasureHeight(void *parameters)
             error_handle(err, ERR_DPS310, "Can't measure Pressure");
             continue;
         }
-        if (count % 34 == 0)
+        if (countTemperatureRead % 34 == 0)
         {
             err = dps310_get_Temperature(&DPS310_Data);
             if (err != ESP_OK)
             {
                 error_handle(err, ERR_DPS310, "Can't measure Temperature");
                 // TODO: check if that happens often
-                count--;
+                countTemperatureRead--;
             }
         }
-        count++;
+        countTemperatureRead++;
         // Filter invalid pressure Results (200Pa = 19m -> change of 600 m in one second)
         if (fabsf(lastPressure - (float)DPS310_Data.Pressure) > 200)
         {
@@ -170,7 +168,7 @@ static void TaskMeasureAcc(void *parameters)
     float rotation[4];
     /* Init BMI088 */
     bmi088_t BMI088_Data;
-    ERROR_RETRYTIMES(bmi088_init(&BMI088_Data, i2c_master_port, 0x18, 0x68), VARIO_I2C_RETRYS_INIT, err);
+    ERROR_RETRYTIMES(bmi088_init(&BMI088_Data, BMI088I2CPort, 0x18, 0x68), VARIO_I2C_RETRYS_INIT, err);
     if (err != ESP_OK)
     {
         error_handle(err, ERR_BMI088, "Can't initialize BMI088");
@@ -180,7 +178,7 @@ static void TaskMeasureAcc(void *parameters)
 
     /* Init QMC588L */
     qmc588l_t *QMC588L_Data = qmc588l_getInstance();
-    ERROR_RETRYTIMES(qmc588l_init(i2c_master_port, 0xD, QMC588L_MR_200HZ, QMC588L_OSR_512, QMC588L_SCALE_2G), VARIO_I2C_RETRYS_INIT, err);
+    ERROR_RETRYTIMES(qmc588l_init(QMC588LI2CPort, 0xD, QMC588L_MR_200HZ, QMC588L_OSR_512, QMC588L_SCALE_2G), VARIO_I2C_RETRYS_INIT, err);
     if (err != ESP_OK)
     {
         error_handle(err, ERR_QMC588L, "Cant initialize QMC588L");
@@ -313,6 +311,7 @@ static void TaskKalmanFilter(void *parameters)
     while (!hasMeasuredStartPressure)
     {
         vTaskDelay(200 / portTICK_PERIOD_MS);
+        ESP_LOGI(TAG, "Wait Klaman Filter");
     }
     kalman_t kf;
     kalman_filter_init(&kf);
@@ -328,6 +327,7 @@ static void TaskKalmanFilter(void *parameters)
     float lastTime = esp_timer_get_time();
     int countHeading = 0;
     bool wasGreater = false;
+    ESP_LOGI(TAG, "Start Kalman Filter");
     while (1)
     {
         // wait for new Result from Pressure Sensor

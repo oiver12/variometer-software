@@ -69,8 +69,9 @@ void FlightLogger_NMEASentenceLogger(void *event_handler_arg, esp_event_base_t e
 
 esp_err_t startLogging()
 {
-    if (init_sdcard("/sdcard") != ESP_OK)
-        return ESP_ERR_INVALID_STATE;
+    esp_err_t err = init_sdcard("/sdcard");
+    if (err != ESP_OK)
+        return err;
     int count = 0;
     do
     {

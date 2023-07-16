@@ -1,6 +1,7 @@
 #include "ButtonInput.h"
 #include "Screen/ScreenManager.h"
 #include "ErrorHandling.h"
+#include "pinDefines.h"
 
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
@@ -10,11 +11,6 @@
 #include <driver/gpio.h>
 #include <esp_log.h>
 #include <esp_timer.h>
-
-#define Button_Enter 1 // Button 1
-#define Button_Menu 2  // Button 2
-#define Button_Up 9    // Button 3
-#define Button_Down 48 // Button 4
 
 #define ButtonEnter_Short (1 << 0)
 #define ButtonEnter_Long (1 << 1)

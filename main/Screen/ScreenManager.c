@@ -6,6 +6,7 @@
 #include "assets/assets.h"
 #include "SettingsManager.h"
 #include "ErrorHandling.h"
+#include "pinDefines.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -193,9 +194,14 @@ void ScreenManager_powerButtonPressed(bool longPress)
     else
     {
         // PowerOff
-        ERROR_CHECKRETURN(esp_sleep_enable_ext0_wakeup(2, 0));
+        esp_err_t err = esp_sleep_enable_ext0_wakeup(2, 0);
+        if (err != ESP_OK)
+        {
+            // grosses Problem!! können nicht mehr aufwachen, was machen?
+            error_handle(err, ERR_SCREEN, "Can't initialize Wakeup Pin!");
+        }
         Display_powerOff_Screen();
-        gpio_set_level(13, 0);
+        gpio_set_level(POWSW_ENABLE, 0);
         vTaskDelay(500 / portTICK_PERIOD_MS);
         esp_deep_sleep_start();
     }
