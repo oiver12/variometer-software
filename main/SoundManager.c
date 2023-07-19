@@ -58,7 +58,6 @@ void SoundManager_Task(void *parameters)
     biepState_t lastBiepState = no_Sound;
     size_t w_bytes = 0;
     int tone_point = 0;
-    esp_err_t err;
     // SoundManager_playToneArray(startSeqeunce, 3);
     while (true)
     {

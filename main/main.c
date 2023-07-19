@@ -3,7 +3,6 @@
 #include <driver/gpio.h>
 #include "nmea_parser.h"
 #include "SDCard.h"
-#include "main.h"
 #include "BatteryManager.h"
 #include "SoundManager.h"
 #include "IGC/IGCLogger.h"

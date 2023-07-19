@@ -34,6 +34,7 @@ void FlightLogger_NMEASentenceLogger(void *event_handler_arg, esp_event_base_t e
 #endif
     case GPS_UPDATE:
         gps = (gps_t *)event_data;
+#if LOGVARIODATA == 1
         time = esp_timer_get_time();
         fwrite(&time, sizeof(time), 1, fileGPSUpdate); // write time to file
         // Write GPS Time
@@ -61,6 +62,28 @@ void FlightLogger_NMEASentenceLogger(void *event_handler_arg, esp_event_base_t e
             fclose(fileGPSUpdate);
             fileGPSUpdate = openFile_sdcard(directoryLogs, fileNameGPSUpdate, "a");
         }
+#elif LOGVARIODATA == 2
+        printf("g");
+        fwrite(&gps->tim.hour, sizeof(uint8_t), 1, stdout);
+        fwrite(&gps->tim.minute, sizeof(uint8_t), 1, stdout);
+        fwrite(&gps->tim.second, sizeof(uint8_t), 1, stdout);
+        fwrite(&gps->tim.thousand, sizeof(uint8_t), 1, stdout);
+        fwrite(&gps->fix, sizeof(gps_fix_t), 1, stdout);
+        fwrite(&gps->fix_mode, sizeof(gps_fix_mode_t), 1, stdout);
+        fwrite(&gps->valid, sizeof(bool), 1, stdout);
+        fwrite(&gps->dop_h, sizeof(float), 1, stdout);
+        fwrite(&gps->dop_p, sizeof(float), 1, stdout);
+        fwrite(&gps->dop_v, sizeof(float), 1, stdout);
+        fwrite(&gps->sats_in_use, sizeof(uint8_t), 1, stdout);
+        fwrite(&gps->sats_in_view, sizeof(uint8_t), 1, stdout);
+        fwrite(&gps->latitude, sizeof(float), 1, stdout);
+        fwrite(&gps->longitude, sizeof(float), 1, stdout);
+        fwrite(&gps->altitude, sizeof(float), 1, stdout);
+        fwrite(&gps->speed, sizeof(float), 1, stdout);
+        fwrite(&gps->cog, sizeof(float), 1, stdout);
+        fwrite(&gps->variation, sizeof(float), 1, stdout);
+        printf("\n");
+#endif
     default:
         break;
     }
@@ -69,6 +92,14 @@ void FlightLogger_NMEASentenceLogger(void *event_handler_arg, esp_event_base_t e
 
 esp_err_t startLogging()
 {
+#if LOGVARIODATA == 0
+    return ESP_OK;
+#endif
+#ifdef NotifyNMEASentence
+    nmea_parser_add_handler(nmea_parser_hndl, FlightLogger_NMEASentenceLogger, NULL, GPS_NMEA_SENTECE);
+#endif
+    nmea_parser_add_handler(nmea_parser_hndl, FlightLogger_NMEASentenceLogger, NULL, GPS_UPDATE);
+
     esp_err_t err = init_sdcard("/sdcard");
     if (err != ESP_OK)
         return err;
@@ -78,7 +109,6 @@ esp_err_t startLogging()
         snprintf(fileNameVario, sizeof(fileNameVario), "Vario%02d.txt", count++);
     } while (fileExists_sdcard(directoryLogs, fileNameVario));
     ESP_LOGI(TAG, "Found file: %s", fileNameVario);
-    // snprintf(fileNameVario, sizeof(fileNameVario), "Vario%02d.txt", --count);
     fileVario = openFile_sdcard(directoryLogs, fileNameVario, "w");
     if (fileVario == NULL)
     {
@@ -104,10 +134,6 @@ esp_err_t startLogging()
     sdstate.status |= SD_CARD_STATE_FLIGHTLOGGING;
     device_state_set_member(&sdstate, device_state_statusSDCard);
     sdCard_init = true;
-#ifdef NotifyNMEASentence
-    nmea_parser_add_handler(nmea_parser_hndl, FlightLogger_NMEASentenceLogger, NULL, GPS_NMEA_SENTECE);
-#endif
-    nmea_parser_add_handler(nmea_parser_hndl, FlightLogger_NMEASentenceLogger, NULL, GPS_UPDATE);
     return ESP_OK;
 }
 
@@ -120,11 +146,14 @@ void endLogging()
 {
 }
 
-esp_err_t logVarioData(FlightLogger_t state)
+esp_err_t logVarioData(FlightLogger_t *state)
 {
+#if LOGVARIODATA == 0
+    return
+#elif LOGVARIODATA == 1
     if (!sdCard_init)
         return ESP_ERR_INVALID_STATE;
-    fwrite(&state, sizeof(FlightLogger_t), 1, fileVario); // write vario_state to file
+    fwrite(state, sizeof(FlightLogger_t), 1, fileVario); // write vario_state to file
     int64_t time = esp_timer_get_time();
     fwrite(&time, sizeof(int64_t), 1, fileVario); // write Time since startup to file
     fprintf(fileVario, "\n");                     // new line
@@ -136,5 +165,10 @@ esp_err_t logVarioData(FlightLogger_t state)
         // fileVario = openFile_sdcard(sdcard, directoryLogs, fileNameVario, true);
     }
     countVarioFile++;
-    return ESP_OK;
+#elif LOGVARIODATA == 2
+    printf("d");
+    fwrite(state, sizeof(FlightLogger_t), 1, stdout);
+    printf("\n");
+#endif
+        return ESP_OK;
 }

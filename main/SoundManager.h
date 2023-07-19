@@ -1,8 +1,6 @@
 #ifndef SOUNDMANAGER_VARIO_H
 #define SOUNDMANAGER_VARIO_H
 
-#include "main.h"
-
 #include <esp_err.h>
 #include <stddef.h>
 #include <stdint.h>

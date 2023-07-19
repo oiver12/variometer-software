@@ -38,6 +38,11 @@ float pressure;
 float temperature;
 SemaphoreHandle_t pressure_temperature_Mutex = NULL; // Gemessen von TaskMeasureHeight und gebraucht in Kalman Filter
 
+// FlightLogger
+float lastAcc[3];
+float lastGyr[3];
+float lastMagn[3];
+
 volatile bool hasMeasuredStartPressure = false;
 
 static const char *TAG = "MainTasks";
@@ -151,7 +156,6 @@ static void TaskMeasureHeight(void *parameters)
         }
         // notify Kalman Filter of new Pressure Reading
         xTaskNotifyGiveIndexed(TaskKalmanFilter_Handle, 0);
-        // vTaskDelay(30 / portTICK_PERIOD_MS);
     }
     vTaskDelete(NULL);
 }
@@ -228,6 +232,11 @@ static void TaskMeasureAcc(void *parameters)
         float mn = -QMC588L_Data->CorrectedMagnValuemG[0];
         float me = QMC588L_Data->CorrectedMagnValuemG[1];
         float md = -QMC588L_Data->CorrectedMagnValuemG[2];
+
+        memcpy(lastAcc, BMI088_Data.acc_mps2, sizeof(lastAcc));
+        memcpy(lastGyr, BMI088_Data.gyr_rps, sizeof(lastGyr));
+        memcpy(lastMagn, QMC588L_Data->CorrectedMagnValuemG, sizeof(lastMagn));
+
         QuaternionFilter_Madgwick(an, ae, ad, gn, ge, gd, mn, me, md, deltaT, rotation);
         count++;
         // if(count % 10 == 0)
@@ -248,7 +257,7 @@ static void TaskMeasureAcc(void *parameters)
         }
         xTaskNotifyGiveIndexed(TaskKalmanFilter_Handle, 1);
         // wait for 1 tick
-        vTaskDelay(1);
+        vTaskDelay((TickType_t)1);
     }
     vTaskDelete(NULL);
 }
@@ -339,10 +348,18 @@ static void TaskKalmanFilter(void *parameters)
         }
         // wait, till acc Reading has finished
         ulTaskNotifyTakeIndexed(1, pdTRUE, portMAX_DELAY);
+
+        FlightLogger_t flight_state;
+        memcpy(flight_state.acc, lastAcc, sizeof(lastAcc));
+        memcpy(flight_state.gyr, lastGyr, sizeof(lastGyr));
+        memcpy(flight_state.magn, lastMagn, sizeof(lastMagn));
+
         float heightDifferenz;
         xSemaphoreTake(pressure_temperature_Mutex, portMAX_DELAY);
         {
             heightDifferenz = ((startTemperature + 273.15) / TEMPGRAD_L) * (pow(pressure / startPressure, -TEMPGRAD_L * R_SPECIFIC / GRAVITY_G) - 1);
+            flight_state.pressure = pressure;
+            flight_state.temperature = startTemperature;
         }
         xSemaphoreGive(pressure_temperature_Mutex);
         float acc = 0;
@@ -384,12 +401,6 @@ static void TaskKalmanFilter(void *parameters)
         kalman_update(&kf);
         kalman_predict(&kf);
 
-        FlightLogger_t flight_state = {
-            .height = heightDifferenz,
-            .accX = acc,
-            .velocity = matrix_get(x, 1, 0),
-            .rotation = {rotation[0], rotation[1], rotation[2], rotation[3]},
-        };
         float vertVel = matrix_get(x, 1, 0);
         if (isnanf(vertVel))
         {
@@ -399,7 +410,6 @@ static void TaskKalmanFilter(void *parameters)
             ResetKalman(&kf);
             continue;
         }
-        // printf("V: %.2f\n", vertVel);
         vario_state_set_member(&vertVel, vario_state_vertVel);
         float accXCorr = acc - 9.81;
         vario_state_set_member(&accXCorr, vario_state_vertAcc);
@@ -413,17 +423,14 @@ static void TaskKalmanFilter(void *parameters)
                 heading -= 360.0;
             while (heading < 0.0)
                 heading += 360.0;
-            // printf("Yaw: %.2f\n", yaw);
             vario_state_set_member(&heading, vario_state_heading);
         }
-        logVarioData(flight_state);
+        logVarioData(&flight_state);
         SoundManager_calculateNewBiep();
         if (vertVel > 10)
             wasGreater = true;
         if (wasGreater)
             ESP_LOGE(TAG, "Was greater");
-        // printf("%.2f\n", vertVel);
-        //  printf("T: %i, pressure: %.1f, ACC: %.2f, S: %i, V: %.2f\n", (int)(deltaT * 1000), pressure, acc, accSize, vertVel);
         lastTime = esp_timer_get_time();
     }
     vTaskDelete(NULL);
