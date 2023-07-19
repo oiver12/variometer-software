@@ -21,6 +21,8 @@ int countVarioFile;
 nmea_parser_handle_t nmea_parser_hndl;
 const char *directoryLogs = "/Trackloggs";
 
+SemaphoreHandle_t loggerSeamphore;
+
 void FlightLogger_NMEASentenceLogger(void *event_handler_arg, esp_event_base_t event_base, int32_t event_id, void *event_data)
 {
     int64_t time;
@@ -63,6 +65,7 @@ void FlightLogger_NMEASentenceLogger(void *event_handler_arg, esp_event_base_t e
             fileGPSUpdate = openFile_sdcard(directoryLogs, fileNameGPSUpdate, "a");
         }
 #elif LOGVARIODATA == 2
+        xSemaphoreTake(loggerSeamphore, portMAX_DELAY);
         printf("g");
         fwrite(&gps->tim.hour, sizeof(uint8_t), 1, stdout);
         fwrite(&gps->tim.minute, sizeof(uint8_t), 1, stdout);
@@ -83,6 +86,7 @@ void FlightLogger_NMEASentenceLogger(void *event_handler_arg, esp_event_base_t e
         fwrite(&gps->cog, sizeof(float), 1, stdout);
         fwrite(&gps->variation, sizeof(float), 1, stdout);
         printf("\n");
+        xSemaphoreGive(loggerSeamphore);
 #endif
     default:
         break;
@@ -95,6 +99,7 @@ esp_err_t startLogging()
 #if LOGVARIODATA == 0
     return ESP_OK;
 #endif
+    loggerSeamphore = xSemaphoreCreateMutex();
 #ifdef NotifyNMEASentence
     nmea_parser_add_handler(nmea_parser_hndl, FlightLogger_NMEASentenceLogger, NULL, GPS_NMEA_SENTECE);
 #endif
@@ -166,9 +171,11 @@ esp_err_t logVarioData(FlightLogger_t *state)
     }
     countVarioFile++;
 #elif LOGVARIODATA == 2
+    xSemaphoreTake(loggerSeamphore, portMAX_DELAY);
     printf("d");
     fwrite(state, sizeof(FlightLogger_t), 1, stdout);
     printf("\n");
+    xSemaphoreGive(loggerSeamphore);
 #endif
         return ESP_OK;
 }

@@ -52,7 +52,7 @@ void ScreenManager_DownArrowPressed();
 void ScreenManager_UpArrowPressed();
 void ScreenManager_EnterKeyPressed();
 
-void Screen_redraw_Screen();
+void Screen_redraw_Screen(uint8_t screenToDraw);
 esp_err_t ScreenManager_add_Screen_add_widgets(WidgetData *widgets, size_t size);
 void ScreenManager_deselctSettingsWidget();
 // returns if it could show the PopUp

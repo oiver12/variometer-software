@@ -182,7 +182,7 @@ void SettingsManager__enter_press()
         {
         case WidgetContent_Settings_PageButton:
             ScreenManager_setMode(ScreenMode_Widget);
-            Screen_redraw_Screen();
+            Screen_redraw_Screen(0);
             rendering_Update(true);
             return;
         case WidgetContent_Settings_PageButton_Audio:

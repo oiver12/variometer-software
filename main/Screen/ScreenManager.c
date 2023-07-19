@@ -114,8 +114,7 @@ esp_err_t ScreenManager_show_Screen(size_t screenIndex)
         printf("Already displaying this Screen, force redraw with Screen_redraw_Screen()");
         return ESP_OK;
     }
-    screenManagerInstance.curr_Screen = screenIndex;
-    Screen_redraw_Screen();
+    Screen_redraw_Screen(screenIndex);
     rendering_Update(true);
     return ESP_OK;
 }
@@ -187,7 +186,7 @@ void ScreenManager_powerButtonPressed(bool longPress)
             {
                 screenManagerInstance.screenMode = ScreenMode_Widget;
                 rendering_Update(true);
-                Screen_redraw_Screen();
+                Screen_redraw_Screen(screenManagerInstance.curr_Screen);
             }
         }
     }
@@ -228,7 +227,7 @@ void ScreenManager_DownArrowPressed()
     {
         // TODO: evtl. in letzte Seite zurückkehren und nicht einfach Widgets laden
         screenManagerInstance.screenMode = ScreenMode_Widget;
-        Screen_redraw_Screen();
+        Screen_redraw_Screen(screenManagerInstance.curr_Screen);
         rendering_Update(false);
     }
     else if (screenManagerInstance.screenMode == ScreenMode_Settings)
@@ -254,7 +253,7 @@ void ScreenManager_UpArrowPressed()
     {
         // TODO: evtl. in letzte Seite zurückkehren und nicht einfach Widgets laden
         screenManagerInstance.screenMode = ScreenMode_Widget;
-        Screen_redraw_Screen();
+        Screen_redraw_Screen(screenManagerInstance.curr_Screen);
         rendering_Update(false);
     }
     else if (screenManagerInstance.screenMode == ScreenMode_Settings)
@@ -269,7 +268,7 @@ void ScreenManager_EnterKeyPressed()
     {
         // TODO: evtl. in letzte Seite zurückkehren und nicht einfach Widgets laden
         screenManagerInstance.screenMode = ScreenMode_Widget;
-        Screen_redraw_Screen();
+        Screen_redraw_Screen(screenManagerInstance.curr_Screen);
         rendering_Update(false);
     }
     else if (screenManagerInstance.screenMode == ScreenMode_Settings)
@@ -281,12 +280,13 @@ void ScreenManager_EnterKeyPressed()
 /*
  * Zeichen den ganzen Bildschirm neu. Z.B. wenn ein neuer Bildschirm geladen wird (es werden z.B. alle Frames von den Widgets gezeichnet)
  */
-void Screen_redraw_Screen()
+void Screen_redraw_Screen(uint8_t screenToDraw)
 {
     // Clear Screen and redraw all widgets
     if (screenManagerInstance.screenMode == ScreenMode_Widget)
     {
         xSemaphoreTake(buffer_Mutex, portMAX_DELAY);
+        screenManagerInstance.curr_Screen = screenToDraw;
         Paint_Clear(WHITE);
         ScreenManager_draw_status_bar();
         for (size_t i = 0; i < screenManagerInstance.screens[screenManagerInstance.curr_Screen].widgetsAdded; i++)
@@ -318,7 +318,7 @@ bool ScreenManager_showPopUp(PopUpConfig_t config)
 void ScreenManager_closePopUp()
 {
     screenManagerInstance.screenMode = ScreenMode_Widget;
-    Screen_redraw_Screen();
+    Screen_redraw_Screen(screenManagerInstance.curr_Screen);
     rendering_Update(false);
 }
 

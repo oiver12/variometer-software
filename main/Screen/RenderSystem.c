@@ -13,6 +13,7 @@
 #include <esp_log.h>
 
 extern void simulationDisplayTask(void *arg);
+extern void simulationKeyHandlerTask(void *arg);
 
 RenderModes_t currentRenderMode = RenderMode_Update;
 bool isSending = false;
@@ -108,6 +109,7 @@ esp_err_t startRendering(uint8_t *ScreenBuffer)
     arguments.renderQueue = renderQueue;
     arguments.ScreenBuffer = ScreenBuffer;
     xTaskCreate(simulationDisplayTask, "displayRefreshTask", 4096, &arguments, 10, NULL);
+    xTaskCreate(simulationKeyHandlerTask, "KeyHandleTask", 2 * 1024, NULL, 10, NULL);
 #endif
     displayInit = true;
     return ESP_OK;
