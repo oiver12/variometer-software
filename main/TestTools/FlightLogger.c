@@ -153,9 +153,7 @@ void endLogging()
 
 esp_err_t logVarioData(FlightLogger_t *state)
 {
-#if LOGVARIODATA == 0
-    return
-#elif LOGVARIODATA == 1
+#if LOGVARIODATA == 1
     if (!sdCard_init)
         return ESP_ERR_INVALID_STATE;
     fwrite(state, sizeof(FlightLogger_t), 1, fileVario); // write vario_state to file
@@ -177,5 +175,5 @@ esp_err_t logVarioData(FlightLogger_t *state)
     printf("\n");
     xSemaphoreGive(loggerSeamphore);
 #endif
-        return ESP_OK;
+    return ESP_OK;
 }

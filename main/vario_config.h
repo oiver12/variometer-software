@@ -5,12 +5,10 @@
 
 // SCREEN
 #define SCREEN_EINK
-// #define SCREEM_ILI9488
-// #define EInk_DoubleBuffer
 
 // FREERTOS
-#define TASK_KALMAN_PRIORITY 5
-#define TASK_HEIGHT_PRIORITY 6
+#define TASK_KALMAN_PRIORITY 6
+#define TASK_HEIGHT_PRIORITY 5
 #define TASK_ACC_PRIORITY 2
 #define TASK_LV_TASK_HANDLE_PRIORITY 2
 #define TASK_SCREEN_RENDER_PRIORITY 8
@@ -27,4 +25,4 @@
 #define VARIO_I2C_RETRYS 3
 
 // 0 = NO LOGGING, 1 = LOG TO SDCARD, 2 = LOG TO SERIAL PORT (for UART use Screen /dev/ttyACM0 115500 and use Ctr H in the Session to log to a File)
-#define LOGVARIODATA 2
+#define LOGVARIODATA 0

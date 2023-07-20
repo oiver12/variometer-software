@@ -1,3 +1,4 @@
+#ifndef ISSIMULATION
 #include "QMC588L.h"
 #include "Screen/ScreenManager.h"
 #include "Flash/flashMemory.h"
@@ -173,3 +174,4 @@ esp_err_t qmc588l_readMag()
     qmc588l_data.CorrectedMagnValuemG[2] = x * magneticMapping[6] + y * magneticMapping[7] + z * magneticMapping[8];
     return ESP_OK;
 }
+#endif

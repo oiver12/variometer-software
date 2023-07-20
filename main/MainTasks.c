@@ -113,12 +113,16 @@ static void TaskMeasureHeight(void *parameters)
     float lastPressure = startPressure;
     while (1)
     {
+#ifdef ISSIMULATION
+        vTaskDelay(30 / portTICK_PERIOD_MS);
+#else
         // wait till unblocked from Interrupt
         uint32_t notificationValue = ulTaskNotifyTake(pdTRUE, 500 / portTICK_PERIOD_MS);
         if (notificationValue == 0)
         {
             ESP_LOGW(TAG, "Interrupt didn't fire");
         }
+#endif
         // watchdog_reset();
         err = dsp310_get_Pressure(&DPS310_Data);
         if (err != ESP_OK)
@@ -256,8 +260,12 @@ static void TaskMeasureAcc(void *parameters)
             xQueueSend(accQueue, &accX, (TickType_t)0);
         }
         xTaskNotifyGiveIndexed(TaskKalmanFilter_Handle, 1);
+#ifdef ISSIMULATION
+        vTaskDelay(30 / portTICK_PERIOD_MS);
+#else
         // wait for 1 tick
         vTaskDelay((TickType_t)1);
+#endif
     }
     vTaskDelete(NULL);
 }

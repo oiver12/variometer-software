@@ -1,3 +1,4 @@
+#ifndef ISSIMULATION
 #include "BMI088.h"
 #include <esp_log.h>
 #include <freertos/task.h>
@@ -180,3 +181,4 @@ esp_err_t bmi088_ReadGyroskop(bmi088_t *dev)
     dev->gyr_rps[2] = gyroConversion * gyrZ;
     return ESP_OK;
 }
+#endif

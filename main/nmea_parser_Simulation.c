@@ -1,8 +1,11 @@
 #ifdef ISSIMULATION
 
 #include "nmea_parser.h"
+#include "SimulationData.h"
 
 #include <stddef.h>
+
+static gps_t gps_Data;
 
 /**
  * @brief Init NMEA Parser
@@ -12,6 +15,7 @@
  */
 nmea_parser_handle_t nmea_parser_init(const nmea_parser_config_t *config, uint32_t taskStackSize)
 {
+    // nothing to do in simulation
     return NULL;
 }
 
@@ -23,6 +27,7 @@ nmea_parser_handle_t nmea_parser_init(const nmea_parser_config_t *config, uint32
  */
 esp_err_t nmea_parser_deinit(nmea_parser_handle_t nmea_hdl)
 {
+    // also nothing to do
     return ESP_OK;
 }
 
@@ -40,7 +45,7 @@ esp_err_t nmea_parser_deinit(nmea_parser_handle_t nmea_hdl)
  */
 esp_err_t nmea_parser_add_handler(nmea_parser_handle_t nmea_hdl, esp_event_handler_t event_handler, void *handler_args, int32_t eventID)
 {
-    return ESP_OK;
+    return simulation_addGPSHandle(event_handler);
 }
 
 /**
