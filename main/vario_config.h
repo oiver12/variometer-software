@@ -24,5 +24,5 @@
 #define VARIO_I2C_RETRYS_INIT 4
 #define VARIO_I2C_RETRYS 3
 
-// 0 = NO LOGGING, 1 = LOG TO SDCARD, 2 = log to Flash in a file
+// 0 = NO LOGGING, 1 = LOG TO SDCARD, 2 = log to Flash in a file, download the files with the "file serving" http example
 #define LOGVARIODATA 2

@@ -200,20 +200,6 @@ esp_err_t startLogging_Flash()
         return ret;
     }
 
-    // #ifdef CONFIG_EXAMPLE_SPIFFS_CHECK_ON_START
-    //     ESP_LOGI(TAG, "Performing SPIFFS_check().");
-    //     ret = esp_spiffs_check(conf.partition_label);
-    //     if (ret != ESP_OK)
-    //     {
-    //         ESP_LOGE(TAG, "SPIFFS_check() failed (%s)", esp_err_to_name(ret));
-    //         return;
-    //     }
-    //     else
-    //     {
-    //         ESP_LOGI(TAG, "SPIFFS_check() successful");
-    //     }
-    // #endif
-
     size_t total = 0, used = 0;
     ret = esp_spiffs_info(conf.partition_label, &total, &used);
     ret = esp_spiffs_format(conf.partition_label);
