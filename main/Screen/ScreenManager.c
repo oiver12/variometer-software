@@ -200,8 +200,8 @@ void ScreenManager_powerButtonPressed(bool longPress)
             error_handle(err, ERR_SCREEN, "Can't initialize Wakeup Pin!");
         }
         Display_powerOff_Screen();
-        gpio_set_level(POWSW_ENABLE, 0);
         vTaskDelay(500 / portTICK_PERIOD_MS);
+        gpio_set_level(POWSW_ENABLE, 0);
         esp_deep_sleep_start();
     }
 }

@@ -81,7 +81,6 @@ float get_Value_Text(WidgetContentType contentType, char *const buffer, size_t b
         if (countGPS % 20 == 0)
         {
             snprintf(buffer, bufferSize, "%i:%i", tempGps.tim.hour, tempGps.tim.minute);
-            printf("GPS Time Update \n");
         }
         else if (bufferSize != 0)
             buffer[0] = 0;

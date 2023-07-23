@@ -81,7 +81,6 @@ void app_main(void)
     nmea_parser_handle_t gps_nmea_hdl = nmea_parser_init(&gps_config, 5 * 1024);
     ESP_LOGI(TAG, "GPS started");
 
-    // sdcard_t *sdcard = calloc(sizeof(sdcard_t), 1);
     init_DeviceContext();
 
     err = init_sdcard("/sdcard");
@@ -104,7 +103,7 @@ void app_main(void)
     err = init_SoundManager();
     ERROR_HANDLEBYERROR(err, ERR_SOUNDMANAGER, "Can't start Sound Manager");
 
-    // err = init_Display();
+    err = init_Display();
     ERROR_HANDLEBYERROR(err, ERR_SCREEN, "Can't start display");
 
     err = flashMemoryInit();
