@@ -15,6 +15,7 @@ set(COMPONENT_SRCS
                     "Bluetooth/bluetooth.cpp"
                     "Watchdog/Watchdog.c"
                     "Flash/flashMemory.c"
+                    "crc/crc.c"
                     )
 file(GLOB NKOLBAN_BLUETOOTH
     "nkolban/*.c"

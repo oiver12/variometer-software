@@ -72,6 +72,9 @@ void app_main(void)
         error_handle(err, ERR_MAIN, "Can't initialize ISR Service");
     }
 
+    // logging_outputToUart();
+    // return;
+
     // // /* Configure GPS Reader Library */
     nmea_parser_config_t gps_config = NMEA_PARSER_CONFIG_DEFAULT();
     gps_config.uart.rx_pin = USART2_RX;
@@ -101,7 +104,7 @@ void app_main(void)
     err = init_SoundManager();
     ERROR_HANDLEBYERROR(err, ERR_SOUNDMANAGER, "Can't start Sound Manager");
 
-    err = init_Display();
+    // err = init_Display();
     ERROR_HANDLEBYERROR(err, ERR_SCREEN, "Can't start display");
 
     err = flashMemoryInit();

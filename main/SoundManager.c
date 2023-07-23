@@ -109,7 +109,7 @@ void SoundManager_Task(void *parameters)
 #ifdef SOUND_ON
         for (int tot_bytes = 0; tot_bytes < BYTE_NUM_EVERY_TONE(durationNow); tot_bytes += w_bytes)
         {
-            err = i2s_write(I2S_NUM, buffer, tone_point * sizeof(int16_t), &w_bytes, 100 / portTICK_PERIOD_MS);
+            esp_err_t err = i2s_write(I2S_NUM, buffer, tone_point * sizeof(int16_t), &w_bytes, 100 / portTICK_PERIOD_MS);
             if (err != ESP_OK)
             {
                 error_handle(err, ERR_SOUNDMANAGER, "Can't write I2S data");
@@ -131,7 +131,6 @@ void SoundManager_calculateNewBiep()
 {
     float newVelocity;
     vario_state_get_member(&newVelocity, vario_state_vertVelLazyBiep, true);
-    // printf("VertVel: %.2f\n", vertVel);
     //  in einer For schleife herausfinden, zwischen welchen Punkten die Geschwindigkeit ist
     for (size_t i = 0; i < soundManager_instance.sizeToneArray; i++)
     {

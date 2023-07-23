@@ -19,6 +19,8 @@ void initLogging(nmea_parser_handle_t nmea_parser_handle);
 esp_err_t startLogging();
 void endLogging();
 
+esp_err_t logging_outputToUart();
+
 esp_err_t logVarioData(FlightLogger_t *state);
 
 #endif

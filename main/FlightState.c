@@ -85,7 +85,6 @@ static void startFlight(gps_t *gps)
     SoundManager_playToneArray(takeOffMelody, 8);
     // startLogging();
     // start_IGCLogger();
-    printf("Start Flight\n");
 }
 
 static void stopFlight()
@@ -96,7 +95,6 @@ static void stopFlight()
     // stop_IGCLogging();
     SoundManager_playToneArray(landingMelody, 8);
     // show Flight Stats Screen
-    printf("Stop Flight\n");
 }
 
 static void startCircling(gps_t *gps)
@@ -108,7 +106,6 @@ static void startCircling(gps_t *gps)
     circlingStartPos.lon = gps->longitude;
     glidingCount = 0;
     // show Circling display
-    printf("Start Circling\n");
     return;
 }
 
@@ -117,7 +114,6 @@ static void stopCircling()
     currFlightM = FM_FLYING;
     deltaHeading_SUM = 0;
     // show normal flying screen
-    printf("stop Circling\n");
 }
 
 static void startGliding(gps_t *gps)
@@ -128,7 +124,6 @@ static void startGliding(gps_t *gps)
     glidingStartPos.alt = gps->altitude;
     float glideRatio = -1;
     flight_stats_set_member(&glideRatio, flight_stats_glideRatio);
-    printf("start gliding\n");
 }
 
 static void stopGliding()
@@ -136,7 +131,6 @@ static void stopGliding()
     currFlightM = FM_FLYING;
     float glideRatio = -1;
     flight_stats_set_member(&glideRatio, flight_stats_glideRatio);
-    printf("stop gliding\n");
 }
 
 static void update_FlightMode(gps_t *gps, int16_t heading)
@@ -157,7 +151,6 @@ static void update_FlightMode(gps_t *gps, int16_t heading)
         glidingCount = _MIN(GLIDING_COUNT_MAX, glidingCount + 1);
     else
         glidingCount = _MAX(GLIDING_COUNT_MIN, glidingCount - 1);
-    printf("DHE: %i, GL: %i, H: %i\n", (int)deltaHeading_SUM, (int)glidingCount, (int)deltaHeading);
     switch (currFlightM)
     {
     case FM_FLYING:

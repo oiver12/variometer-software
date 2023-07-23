@@ -13,7 +13,7 @@
 #define TASK_LV_TASK_HANDLE_PRIORITY 2
 #define TASK_SCREEN_RENDER_PRIORITY 8
 
-#define TakeOffSpeed 1   // km/h
+#define TakeOffSpeed 6   // km/h
 #define LandingSpeed 2   // km/h
 #define LandingTimout 10 // s
 
@@ -24,5 +24,5 @@
 #define VARIO_I2C_RETRYS_INIT 4
 #define VARIO_I2C_RETRYS 3
 
-// 0 = NO LOGGING, 1 = LOG TO SDCARD, 2 = LOG TO SERIAL PORT (for UART use Screen /dev/ttyACM0 115500 and use Ctr H in the Session to log to a File)
-#define LOGVARIODATA 0
+// 0 = NO LOGGING, 1 = LOG TO SDCARD, 2 = log to Flash in a file
+#define LOGVARIODATA 2

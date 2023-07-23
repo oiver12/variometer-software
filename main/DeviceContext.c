@@ -99,7 +99,7 @@ static void device_state_gps_handle(void *event_handler_arg, esp_event_base_t ev
     {
     case GPS_UPDATE:
         gps = (gps_t *)event_data;
-        // ESP_LOGI("GPS", "Sats IV: %i, Sats IU: %i, fix: %i", (int)gps->sats_in_view, (int)gps->sats_in_use, (int)gps->fix);
+        ESP_LOGI("GPS", "Sats IV: %i, Sats IU: %i, fix: %i", (int)gps->sats_in_view, (int)gps->sats_in_use, (int)gps->fix);
         // update vario state
         vario_state_set_member(&gps->altitude, vario_state_altitudeGPS);
         float speedGroundKMH = gps->speed * 3.6f;
@@ -163,7 +163,6 @@ static void vertVelBiepSetFIFOCount(uint16_t size)
     fifo_create_static(&vario_state.vertVelBiep_Fifo, vario_state.VertVelbuffer, size, sizeof(float));
     vario_state.vertVelBiep_Sum = 0;
     xSemaphoreGive(semaphore_vario_state);
-    printf("Size: %i", (int)size);
 }
 
 void vario_state_set_member(void *value, vario_state_member_t member)
@@ -188,12 +187,10 @@ void vario_state_set_member(void *value, vario_state_member_t member)
         if (fifo_is_full(&vario_state.vertVelBiep_Fifo))
         {
             fifo_get(&vario_state.vertVelBiep_Fifo, &temp);
-            printf("Delete\n");
             vario_state.vertVelBiep_Sum -= temp;
         }
         vario_state.vertVelBiep_Sum += vario_state.vertVelocity;
         fifo_add(&vario_state.vertVelBiep_Fifo, &vario_state.vertVelocity);
-        printf("ADD\n");
         vario_state.stateChange |= vario_state_vertVelLazyBiep;
         break;
     case vario_state_groundSpeed:

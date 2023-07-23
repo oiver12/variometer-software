@@ -87,7 +87,7 @@ esp_err_t init_sdcard(const char *Mount_Point)
     FRESULT res = f_getfree(sdCardInstance.Mount_Point, &fre_clust, &fs);
     if (res)
     {
-        printf("Couldn't find out SdCard size\n");
+        ESP_LOGW(TAG, "Couldn't find out SdCard size");
         sdcard_state_vario.freeSpace = 0;
         sdcard_state_vario.maxSpace = 0;
         sdcard_state_vario.status |= SD_CARD_STATE_INIT;
@@ -174,7 +174,7 @@ uint64_t sdcard_remainingSpace_update()
     FRESULT res = f_getfree(sdCardInstance.Mount_Point, &fre_clust, &fs);
     if (res)
     {
-        printf("Couldn't find out SdCard size\n");
+        ESP_LOGW(TAG, "Couldn't find out SdCard size");
         state.freeSpace = 0;
         state.maxSpace = 0;
         state.status |= SD_CARD_STATE_INIT;
@@ -191,7 +191,7 @@ uint64_t sdcard_remainingSpace_update()
 
     state.freeSpace = tmp_free_bytes;
     state.maxSpace = tmp_total_bytes;
-    printf("%llu total bytes. %llu free bytes. sector_size=%u\n", tmp_total_bytes, tmp_free_bytes, FF_SS_SDCARD);
+    ESP_LOGI(TAG, "%llu total bytes. %llu free bytes. sector_size=%u", tmp_total_bytes, tmp_free_bytes, FF_SS_SDCARD);
     device_state_set_member(&state, device_state_statusSDCard);
     return tmp_free_bytes;
 }
@@ -218,10 +218,10 @@ esp_err_t GetFlights(int startIndex, widget_Settings_linkedList *flightListHead)
                 if (flightListHead == NULL)
                 {
                     closedir(dir);
-                    printf("Couldn't find next Flight\n");
+                    ESP_LOGW(TAG, "Couldn't find next Flight");
                     return ESP_ERR_INVALID_ARG;
                 }
-                printf("FlighName: %s\n", fileName);
+                ESP_LOGI(TAG, "FlighName: %s", fileName);
                 strcpy(((FlightList_Widget_Data *)flightListHead->data.extr_data)->FlightName, fileName);
                 flightListHead = flightListHead->next;
                 tookenFiles++;
@@ -237,7 +237,7 @@ esp_err_t GetFlights(int startIndex, widget_Settings_linkedList *flightListHead)
     }
     else
     {
-        printf("Cant open directory\n");
+        ESP_LOGW(TAG, "Cant open directory\n");
         return ESP_ERR_NOT_FOUND;
     }
     return ESP_OK;
