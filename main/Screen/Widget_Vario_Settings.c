@@ -198,8 +198,7 @@ void vario_handle_Slider(WidgetData *widget, Button_Direction direction)
     uint16_t maxVolume = 0;
     Slider_Get_Value(widget->type, &currValue, &maxVolume);
     uint16_t amount = maxVolume * 0.05;
-    // currValue += direction == Button_Direction_up ? amount : -amount;
-    currValue += amount;
+    currValue += direction == Button_Direction_up ? amount : -amount;
     if (currValue > maxVolume)
         currValue = maxVolume;
 

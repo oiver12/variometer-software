@@ -3,6 +3,8 @@
 #include "kalman.h"
 #include "cholesky.h"
 #include <string.h>
+#include <math.h>
+#include <stdio.h>
 
 void kalman_filter_init(kalman_t *kf)
 {
@@ -84,7 +86,9 @@ void kalman_update(kalman_t *kf)
     matrix_t *RESTRICT const temp_PHt = &kf->temporary.PHt;
     matrix_t *RESTRICT const temp_KHtP = &kf->temporary.KHtP;
     const matrix_t *RESTRICT const temp_identity = &kf->temporary.identity;
-
+    // printf("---------------Update-------------\n");
+    // printf("K1=");
+    // matrix_print(K);
     /*******************************************/
     /*  K = P*H'*(H*P*H'+R)^-1                 */
     /*******************************************/
@@ -94,10 +98,14 @@ void kalman_update(kalman_t *kf)
     matrix_mult_transb(temp_HP, H, S); // S = temp_HP*H'
     matrix_add_inplace(S, &kf->R);     // S += R
     // K = P*H' * S^-1
-    cholesky_decompose_lower(S);
+    int result = cholesky_decompose_lower(S);
     matrix_invert_lower(S, Sinv);        // Sinv = S^-1
     matrix_mult_transb(P, H, temp_PHt);  // temp_Pht = P*H'
     matrix_mult(temp_PHt, Sinv, K, aux); // K = temp_Pht*S^-1
+    // printf("K2 %i=", result);
+    // matrix_print(K);
+    // printf("X1=");
+    // matrix_print(x);
     /*******************************************/
     /*  x = x + K*(z - H*x)                    */
     /*******************************************/
@@ -106,6 +114,10 @@ void kalman_update(kalman_t *kf)
     matrix_sub_inplace_b(&kf->z, y);
     // x = x + K*y
     matrix_multadd_rowvector(K, y, x);
+    // printf("X2=");
+    // matrix_print(x);
+    // printf("P1=");
+    // matrix_print(P);
     /*******************************************/
     /*  P = (1 - K*H)*P*(1 - KH)' + KRK'        */
     /********************************************/
@@ -116,6 +128,8 @@ void kalman_update(kalman_t *kf)
     matrix_mult(K, &kf->R, temp_PHt, aux);            // temp_PHt = K*R
     matrix_mult_transb(temp_PHt, K, temp_KH);         // temp_KH = K*R*K'
     matrix_add(temp_KHtP, temp_KH, P);                // P = (1 - K*H)*P*(1 - K*H)' + K*R*K'
+    // printf("P2=");
+    // matrix_print(P);
 }
 
 void kalman_predict(kalman_t *kf)
@@ -135,16 +149,25 @@ void kalman_predict(kalman_t *kf)
     matrix_t *RESTRICT const xtemp = &kf->temporary.xtemp;
     matrix_t *RESTRICT const temp_Gu = &kf->temporary.Gu;
     matrix_t *RESTRICT const temp_FP = &kf->temporary.KHP;
+    // printf("---------------Predict---------------\n");
+    // printf("X1=");
+    // matrix_print(x);
     /************************************************************************/
     /* x = F*x + G*u                                                        */
     /************************************************************************/
     matrix_mult_rowvector(F, x, xtemp); // xtemp = F*x
     matrix_mult(G, u, temp_Gu, aux);    // temp_Gu = G*u
     matrix_add(xtemp, temp_Gu, x);      // x = xtemp + temp_Gu
+    // printf("X2=");
+    // matrix_print(x);
+    // printf("P1=");
+    // matrix_print(P);
     /************************************************************************/
     /* P = F*P*F' + Q                                                       */
     /************************************************************************/
     matrix_mult(F, P, temp_FP, aux);   // temp_FP = F*P
     matrix_mult_transb(temp_FP, F, P); // P = temp_FP*F'
     matrix_add_inplace(P, Q);          // P = P + Q
+    // printf("P2=");
+    // matrix_print(P);
 }

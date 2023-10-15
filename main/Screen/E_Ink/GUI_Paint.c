@@ -84,7 +84,6 @@ void Paint_NewImage(UBYTE *image, UWORD Width, UWORD Height, UWORD Rotate, UWORD
 
     Paint.WidthByte = (Width % 8 == 0) ? (Width / 8) : (Width / 8 + 1);
     Paint.HeightByte = Height;
-    printf("WidthByte = %d, HeightByte = %d\r\n", Paint.WidthByte, Paint.HeightByte);
 
     Paint.Rotate = Rotate;
     Paint.Mirror = MIRROR_NONE;

@@ -251,7 +251,7 @@ static esp_err_t EPD_3IN7_ReadBusy_HIGH(void)
     }
     else
     {
-        ESP_LOGI("EPD", "Interrupt did fire: %i ms", (int)(esp_timer_get_time() - startTime) / 1000);
+        // ESP_LOGI("EPD", "Interrupt did fire: %i ms", (int)(esp_timer_get_time() - startTime) / 1000);
         err = ESP_OK;
     }
     gpio_isr_handler_remove(EPD_BUSY_PIN);

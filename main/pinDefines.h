@@ -1,4 +1,4 @@
-#define VERSION2n2n1
+#define VERSION2n2
 
 #ifdef VERSION2n2
 #define POWSW_ENABLE 13
@@ -80,8 +80,8 @@
 
 #define Button_Enter 1 // Button 1
 #define Button_Menu 2  // Button 2
-#define Button_Up 9    // Button 3
-#define Button_Down 43 // Button 4
+#define Button_Up 43   // Button 3
+#define Button_Down 9  // Button 4
 
 #define BAT_MS 46
 #define BAT_ADCUNIT ADC_UNIT_1

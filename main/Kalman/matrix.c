@@ -332,7 +332,7 @@ void matrix_multadd_rowvector(const matrix_t *RESTRICT const a, const matrix_t *
     }
 }
 
-void print_matrix(const matrix_t *a)
+void matrix_print(const matrix_t *a)
 {
     for (size_t row = 0; row < a->rows; row++)
     {

@@ -26,7 +26,7 @@
 
 /* Kalman Filter */
 float dps310_stnd_height = 0.1298;    // Standardabweichung Höhenmessung
-float bmi088_stnd_acc = 0.9;          // Standardabweichung Beschleunigungssensor
+float bmi088_stnd_acc = 0.2;          // Standardabweichung Beschleunigungssensor
 TaskHandle_t TaskKalmanFilter_Handle; // zum entsperen des Kalman Filter Task, wird von TaskMeasureHeight gemacht
 
 QueueHandle_t accQueue;
@@ -75,12 +75,12 @@ static void TaskMeasureHeight(void *parameters)
     }
     for (size_t i = 0; i < 10; i++)
     {
-        err = dsp310_get_Pressure(&DPS310_Data);
-        if (err != ESP_OK)
-            error_handle(err, ERR_DPS310, "Pressure reading failed");
         err = dps310_get_Temperature(&DPS310_Data);
         if (err != ESP_OK)
             error_handle(err, ERR_DPS310, "Temperature reading failed");
+        err = dsp310_get_Pressure(&DPS310_Data);
+        if (err != ESP_OK)
+            error_handle(err, ERR_DPS310, "Pressure reading failed");
         startPressure += DPS310_Data.Pressure;
         startTemperature += DPS310_Data.Temperature;
         vTaskDelay(30 / portTICK_PERIOD_MS);
@@ -171,7 +171,6 @@ static void TaskMeasureAcc(void *parameters)
     {
         vTaskDelay(2);
     }
-    watchdog_add(NULL);
     esp_err_t err;
     float rotation[4];
     /* Init BMI088 */
@@ -211,6 +210,7 @@ static void TaskMeasureAcc(void *parameters)
 
     float lastAccX = 9.81f;
     int counterAccX = 0;
+    watchdog_add(NULL);
     while (1)
     {
         watchdog_reset();
@@ -365,17 +365,19 @@ static void TaskKalmanFilter(void *parameters)
         float heightDifferenz;
         xSemaphoreTake(pressure_temperature_Mutex, portMAX_DELAY);
         {
+            // Temp. measurement not working... set to default
+            startTemperature = 20;
             heightDifferenz = ((startTemperature + 273.15) / TEMPGRAD_L) * (pow(pressure / startPressure, -TEMPGRAD_L * R_SPECIFIC / GRAVITY_G) - 1);
             flight_state.pressure = pressure;
             flight_state.temperature = startTemperature;
         }
         xSemaphoreGive(pressure_temperature_Mutex);
-        float acc = 0;
+        volatile float acc = 0;
         float rotation[4] = {1, 0, 0, 0};
 
         float tempAcc;
-        float accSum = 0;
-        int accSize = 0;
+        volatile float accSum = 0;
+        volatile int accSize = 0;
         while (xQueueReceive(accQueue, &tempAcc, (TickType_t)0) == pdTRUE)
         {
             accSum += tempAcc;
@@ -389,6 +391,7 @@ static void TaskKalmanFilter(void *parameters)
         else
             acc = accSum / accSize;
         deltaT = (esp_timer_get_time() - lastTime) / 1000000;
+
         /* Set Q with new deltaT */
         matrix_set(Q, 0, 0, ((deltaT * deltaT * deltaT * deltaT) / 4) * bmi088_stnd_acc * bmi088_stnd_acc);
         matrix_set(Q, 0, 1, ((deltaT * deltaT * deltaT) / 2) * bmi088_stnd_acc * bmi088_stnd_acc);
@@ -407,9 +410,17 @@ static void TaskKalmanFilter(void *parameters)
         /* Set Input */
         matrix_set(u, 0, 0, acc - 9.81);
         kalman_update(&kf);
+        if (fabs(matrix_get(x, 1, 0)) > 100.0)
+        {
+            ESP_LOGE(TAG, "Was greater 1");
+        }
         kalman_predict(&kf);
+        if (fabs(matrix_get(x, 1, 0)) > 100.0)
+        {
+            ESP_LOGE(TAG, "Was greater 2");
+        }
 
-        float vertVel = matrix_get(x, 1, 0);
+        double vertVel = matrix_get(x, 1, 0);
         if (isnanf(vertVel))
         {
             // not working
@@ -435,10 +446,44 @@ static void TaskKalmanFilter(void *parameters)
         }
         logVarioData(&flight_state);
         SoundManager_calculateNewBiep();
-        if (vertVel > 10)
-            wasGreater = true;
-        if (wasGreater)
-            ESP_LOGE(TAG, "Was greater");
+        // printf("Vel%.2f\n", vertVel);
+        // // State Vector
+        // static volatile float x_Buffer[2 * 1];
+        // memcpy(x_Buffer, kf.x_Buffer, sizeof(x_Buffer));
+        // // Output Vector
+        // static volatile float z_Buffer[1 * 1];
+        // memcpy(z_Buffer, kf.z_Buffer, sizeof(z_Buffer));
+        // // State Transition Matrix
+        // static volatile float F_Buffer[2 * 2];
+        // memcpy(F_Buffer, kf.F_Buffer, sizeof(F_Buffer));
+        // // Input Variable
+        // static volatile float u_Buffer[1 * 1];
+        // memcpy(u_Buffer, kf.u_Buffer, sizeof(u_Buffer));
+        // // Control Matrix
+        // static volatile float G_Buffer[2 * 1];
+        // memcpy(G_Buffer, kf.G_Buffer, sizeof(G_Buffer));
+        // // Estimate Uncertainty
+        // static volatile float P_Buffer[2 * 2];
+        // memcpy(P_Buffer, kf.P_Buffer, sizeof(P_Buffer));
+        // // Process Noise Uncertainty
+        // static volatile float Q_Buffer[2 * 2];
+        // memcpy(Q_Buffer, kf.Q_Buffer, sizeof(Q_Buffer));
+        // // Measurement Uncertainty
+        // static volatile float R_Buffer[1 * 1];
+        // memcpy(R_Buffer, kf.R_Buffer, sizeof(R_Buffer));
+        // // Oberservation Matrix
+        // static volatile float H_Buffer[1 * 2];
+        // memcpy(H_Buffer, kf.H_Buffer, sizeof(H_Buffer));
+        // // Kalman Gain
+        // static volatile float K_Buffer[2 * 1];
+        // memcpy(K_Buffer, kf.K_Buffer, sizeof(K_Buffer));
+        // // Residual covariance matrix
+        // static volatile float S_Buffer[1 * 1];
+        // memcpy(S_Buffer, kf.S_Buffer, sizeof(S_Buffer));
+        // // Innovativ vector
+        // static volatile float y_Buffer[1 * 1];
+        // memcpy(y_Buffer, kf.y_Buffer, sizeof(y_Buffer));
+        printf("Kal: %.2fv, %.2fm, %.2fa, %ims\n", vertVel, heightDifferenz, acc, (int)(deltaT * 1000.0f));
         lastTime = esp_timer_get_time();
     }
     vTaskDelete(NULL);

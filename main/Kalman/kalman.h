@@ -14,61 +14,61 @@ typedef struct
 {
     // State Vector
     matrix_t x;
-    float x_Buffer[KALMAN_NUM_STATES * 1];
+    matrix_data_t x_Buffer[KALMAN_NUM_STATES * 1];
     // Output Vector
     matrix_t z;
-    float z_Buffer[KALMAN_NUM_MEASUREMENTS * 1];
+    matrix_data_t z_Buffer[KALMAN_NUM_MEASUREMENTS * 1];
     // State Transition Matrix
     matrix_t F;
-    float F_Buffer[KALMAN_NUM_STATES * KALMAN_NUM_STATES];
+    matrix_data_t F_Buffer[KALMAN_NUM_STATES * KALMAN_NUM_STATES];
     // Input Variable
     matrix_t u;
-    float u_Buffer[KALMAN_NUM_INPUTS * 1];
+    matrix_data_t u_Buffer[KALMAN_NUM_INPUTS * 1];
     // Control Matrix
     matrix_t G;
-    float G_Buffer[KALMAN_NUM_STATES * KALMAN_NUM_INPUTS];
+    matrix_data_t G_Buffer[KALMAN_NUM_STATES * KALMAN_NUM_INPUTS];
     // Estimate Uncertainty
     matrix_t P;
-    float P_Buffer[KALMAN_NUM_STATES * KALMAN_NUM_STATES];
+    matrix_data_t P_Buffer[KALMAN_NUM_STATES * KALMAN_NUM_STATES];
     // Process Noise Uncertainty
     matrix_t Q;
-    float Q_Buffer[KALMAN_NUM_STATES * KALMAN_NUM_STATES];
+    matrix_data_t Q_Buffer[KALMAN_NUM_STATES * KALMAN_NUM_STATES];
     // Measurement Uncertainty
     matrix_t R;
-    float R_Buffer[KALMAN_NUM_MEASUREMENTS * KALMAN_NUM_MEASUREMENTS];
+    matrix_data_t R_Buffer[KALMAN_NUM_MEASUREMENTS * KALMAN_NUM_MEASUREMENTS];
     // Oberservation Matrix
     matrix_t H;
-    float H_Buffer[KALMAN_NUM_MEASUREMENTS * KALMAN_NUM_STATES];
+    matrix_data_t H_Buffer[KALMAN_NUM_MEASUREMENTS * KALMAN_NUM_STATES];
     // Kalman Gain
     matrix_t K;
-    float K_Buffer[KALMAN_NUM_STATES * KALMAN_NUM_MEASUREMENTS];
+    matrix_data_t K_Buffer[KALMAN_NUM_STATES * KALMAN_NUM_MEASUREMENTS];
     // Residual covariance matrix
     matrix_t S;
-    float S_Buffer[KALMAN_NUM_MEASUREMENTS * KALMAN_NUM_MEASUREMENTS];
+    matrix_data_t S_Buffer[KALMAN_NUM_MEASUREMENTS * KALMAN_NUM_MEASUREMENTS];
     // Innovativ vector
     matrix_t y;
-    float y_Buffer[KALMAN_NUM_MEASUREMENTS * 1];
+    matrix_data_t y_Buffer[KALMAN_NUM_MEASUREMENTS * 1];
     struct
     {
         matrix_data_t aux[KALMAN_AUX_ROWS_SIZE * 1];
         matrix_t S_inv;
-        float S_inv_Buffer[KALMAN_NUM_MEASUREMENTS * KALMAN_NUM_MEASUREMENTS];
+        matrix_data_t S_inv_Buffer[KALMAN_NUM_MEASUREMENTS * KALMAN_NUM_MEASUREMENTS];
         matrix_t HP;
-        float HP_Buffer[KALMAN_NUM_MEASUREMENTS * KALMAN_NUM_STATES];
+        matrix_data_t HP_Buffer[KALMAN_NUM_MEASUREMENTS * KALMAN_NUM_STATES];
         matrix_t KH;
-        float KH_Buffer[KALMAN_NUM_STATES * KALMAN_NUM_STATES];
+        matrix_data_t KH_Buffer[KALMAN_NUM_STATES * KALMAN_NUM_STATES];
         matrix_t KHP;
-        float KHP_Buffer[KALMAN_NUM_STATES * KALMAN_NUM_STATES];
+        matrix_data_t KHP_Buffer[KALMAN_NUM_STATES * KALMAN_NUM_STATES];
         matrix_t KHtP;
-        float KHtP_Buffer[KALMAN_NUM_STATES * KALMAN_NUM_STATES];
+        matrix_data_t KHtP_Buffer[KALMAN_NUM_STATES * KALMAN_NUM_STATES];
         matrix_t PHt;
-        float PHt_Buffer[KALMAN_NUM_STATES * KALMAN_NUM_MEASUREMENTS];
+        matrix_data_t PHt_Buffer[KALMAN_NUM_STATES * KALMAN_NUM_MEASUREMENTS];
         matrix_t identity;
-        float identity_Buffer[KALMAN_NUM_STATES * KALMAN_NUM_STATES];
+        matrix_data_t identity_Buffer[KALMAN_NUM_STATES * KALMAN_NUM_STATES];
         matrix_t xtemp;
-        float xtemp_Buffer[KALMAN_NUM_STATES * 1];
+        matrix_data_t xtemp_Buffer[KALMAN_NUM_STATES * 1];
         matrix_t Gu;
-        float Gu_Buffer[KALMAN_NUM_STATES * 1];
+        matrix_data_t Gu_Buffer[KALMAN_NUM_STATES * 1];
     } temporary;
 
 } kalman_t;

@@ -211,5 +211,6 @@ void matrix_add_inplace(const matrix_t *a, const matrix_t *const b) HOT;
  */
 void matrix_add(const matrix_t *a, const matrix_t *const b, const matrix_t *c) HOT;
 
+void matrix_print(const matrix_t *a);
 #undef EXTERN_INLINE_MATRIX
 #endif
