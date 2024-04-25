@@ -82,8 +82,11 @@ void app_main(void)
     ESP_LOGI(TAG, "GPS started");
 
     init_DeviceContext();
-
+#ifdef ISSIMULATION
+    err = init_sdcard("sdcard");
+#else
     err = init_sdcard("/sdcard");
+#endif
     if (err == ESP_FAIL)
     {
         error_handle(err, ERR_SDCARD, "Can't mount File System");

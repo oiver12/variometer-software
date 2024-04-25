@@ -4,12 +4,13 @@
 #include "Widget_Vario_Common.h"
 #include "assets/assets.h"
 
+#include <esp_log.h>
 #include <stdio.h>
 #include <math.h>
 #include <time.h>
 
 #define BUFFER_TEXT_SIZE 20
-#define Compass_Method1
+// #define Compass_Method1
 
 #define COMPASS_1METHOD
 #define DEGREE_TO_RADIAN 0.01745329251
@@ -160,7 +161,7 @@ static const char *get_Unit_Text(WidgetContentType contentType)
 
 static void add_TextBox_Widget(WidgetData *widget)
 {
-    // TODO wenn Widget gelöscht wird, muss auch das hiet gelöscht werden
+    // TODO wenn Widget gelöscht wird, muss auch das hier gelöscht werden
     TextBox_Widget_Data *extr_data = malloc(sizeof(TextBox_Widget_Data));
     widget->extr_data = (void *)extr_data;
 
@@ -439,6 +440,9 @@ static void add_TrackPoint_Widget(WidgetData *widget)
 
 static void update_TextBox_Widget(WidgetData *widget)
 {
+    uint16_t backgroundColor;
+    uint16_t textColor;
+    GetWidgetColor(widget, &backgroundColor, &textColor);
     char tempBuffer[10];
     get_Value_Text(widget->type, tempBuffer, 10, false, true);
     // Update Value Text
@@ -447,7 +451,7 @@ static void update_TextBox_Widget(WidgetData *widget)
         sFONT *font = __FontStack[(widget->extraStyle & WS_FONT_MASK_CONTENT) >> 4];
         uint16_t textWidth = getTextWidth(tempBuffer, font);
         // Clear surface in frame
-        Paint_ClearWindows(widget->x + 5, widget->y + ((TextBox_Widget_Data *)widget->extr_data)->yStartValueText - 2, ((TextBox_Widget_Data *)widget->extr_data)->linkerRandUnitText - 8, widget->y + (widget->h / 2) + 21, WHITE);
+        Paint_ClearWindows(widget->x + 5, widget->y + ((TextBox_Widget_Data *)widget->extr_data)->yStartValueText - 2, ((TextBox_Widget_Data *)widget->extr_data)->linkerRandUnitText - 8, widget->y + (widget->h / 2) + 21, backgroundColor);
         // Paint_DrawRectangle(widget->x + 5, ((TextBox_Widget_Data*)widget->extr_data)->yStartValueText - 2, ((TextBox_Widget_Data*)widget->extr_data)->linkerRandUnitText - 8, widget->y + (widget->h / 2) + 21, WHITE, DOT_PIXEL_1X1, DRAW_FILL_FULL);
         DrawTextWithOffset(widget, tempBuffer, ((((TextBox_Widget_Data *)widget->extr_data)->linkerRandUnitText - widget->x) / 2) - textWidth / 2, ((TextBox_Widget_Data *)widget->extr_data)->yStartValueText, font, FALSE);
     }
@@ -743,16 +747,18 @@ static void update_Airspace_Widget(WidgetData *widget)
 
 static void update_TrackPoint_Widget(WidgetData *widget)
 {
-    const float ZOOM_FACTOR = 0.6;
+    const float ZOOM_FACTOR = 5;
     int heading;
-    vario_state_get_member(&heading, vario_state_heading, false);
-    float theta = DEGREE_TO_RADIAN * (180 - heading);
+    vario_state_get_member(&heading, vario_state_gpsHeading, false);
+    float theta = DEGREE_TO_RADIAN * (180.0f - heading);
     flight_stats_t *flightStats = flight_stats_take_trackPoints();
+    // No GPS Fix
     if (flightStats == NULL)
         return;
     Paint_ClearWindows(widget->x + 1, widget->y + 1, widget->x + widget->w - 1, widget->y + widget->h - 1, WHITE);
     float cosT = cosf(theta);
     float sinT = sinf(theta);
+    // ESP_LOGI("Vario", "TrackPoint Widget %.2f", flightStats->trackPoints[flightStats->rearPoint].vario);
     for (int i = flightStats->rearPoint; i != flightStats->frontPoint;)
     {
 #if 1 // 0 clock is heading
@@ -797,6 +803,7 @@ static void update_TrackPoint_Widget(WidgetData *widget)
         Paint_DrawLine(cx - 10, cy, cx, cy - 18, BLACK, DOT_PIXEL_1X1, LINE_STYLE_SOLID);
         Paint_DrawLine(cx, cy - 18, cx + 10, cy, BLACK, DOT_PIXEL_1X1, LINE_STYLE_SOLID);
     }
+    flight_stats_give_trackPoints();
 }
 
 void vario_display_add_widget(WidgetData *widget)

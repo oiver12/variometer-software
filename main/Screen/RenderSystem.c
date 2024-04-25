@@ -6,6 +6,7 @@
 #include "Watchdog/Watchdog.h"
 #include "ErrorHandling.h"
 #include "vario_config.h"
+#include "SDLHelper/SDL_helper.h"
 
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
@@ -77,7 +78,6 @@ esp_err_t startRendering(uint8_t *ScreenBuffer)
 {
     buffer_Mutex = xSemaphoreCreateMutex();
     ScreenManager_init(buffer_Mutex);
-
     static WidgetData widgetDataScreen0[8] = {
         {.extraStyle = WS_FONT_24_CONTENT, .h = 60, .w = 160, .style = Widget_TextBox, .type = WidgetContent_Vario_Active, .x = 0, .y = 27},
         {.extraStyle = WS_FONT_20_CONTENT, .h = 130, .w = 100, .style = Widget_Compass, .type = WidgetContent_CompassSensor, .x = 0, .y = 87},
@@ -93,10 +93,10 @@ esp_err_t startRendering(uint8_t *ScreenBuffer)
         {.extraStyle = WS_FONT_32_CONTENT, .h = 60, .w = 160, .style = Widget_TextBox, .type = WidgetContent_Time_GPS, .x = 0, .y = 27},
         {.extraStyle = WS_FONT_24_CONTENT, .h = 60, .w = 160, .style = Widget_TextBox, .type = WidgetContent_Altitude_AGL, .x = 160, .y = 27},
         {.extraStyle = WS_FONT_24_CONTENT, .h = 60, .w = 160, .style = Widget_TextBox, .type = WidgetContent_Speed_Ground, .x = 320, .y = 27},
-        {.extraStyle = WS_FONT_32_CONTENT, .h = 100, .w = 200, .style = Widget_SdCardInfo, .type = WidgetContent_SDCardInfo, .x = 280, .y = 87},
+        {.extraStyle = WS_FONT_32_CONTENT, .h = 150, .w = 200, .style = Widget_TrackPoints, .type = WidgetContent_TrackPoints, .x = 280, .y = 87},
         {.extraStyle = WS_FONT_12_CONTENT, .h = 100, .w = 200, .style = Widget_Airspace, .type = WidgetContent_Airspace, .x = 0, .y = 87}};
     ScreenManager_add_Screen_add_widgets(widgetDataScreen1, 5);
-    ScreenManager_show_Screen(0);
+    ScreenManager_show_Screen(1);
 
     renderQueue = xQueueCreate(1, sizeof(Display_RefreshMode));
 
@@ -108,7 +108,7 @@ esp_err_t startRendering(uint8_t *ScreenBuffer)
     arguments.buffer_Mutex = buffer_Mutex;
     arguments.renderQueue = renderQueue;
     arguments.ScreenBuffer = ScreenBuffer;
-    xTaskCreate(simulationDisplayTask, "displayRefreshTask", 4096, &arguments, 10, NULL);
+    xTaskCreate(simulationDisplayTask, "displayRefreshTask", 2 * 4096, &arguments, 10, NULL);
     xTaskCreate(simulationKeyHandlerTask, "KeyHandleTask", 2 * 1024, NULL, 10, NULL);
 #endif
     displayInit = true;

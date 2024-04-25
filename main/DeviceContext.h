@@ -38,12 +38,13 @@ typedef struct
     float agl;
     float longitude;
     float latitude;
+    int gpsHeading;
     Airspace_Info_t airspaceInfo;
     struct fifo_descriptor vertVelBiep_Fifo;
     float VertVelbuffer[FIFO_MAX_BIEPVERTLAZY_SIZE];
     float vertVelBiep_Sum;
 
-    uint16_t stateChange;
+    uint32_t stateChange;
 } vario_state_t;
 
 typedef enum
@@ -60,10 +61,11 @@ typedef enum
     vario_state_gps_data = 1 << 9,         // gsp_t
     vario_state_groundLevel = 1 << 10,     // float
     vario_state_agl = 1 << 11,             // float
-    vario_state_longitude = 1 << 12,       // float
+    vario_state_longitude = 1 << 12,       // int
     vario_state_latitude = 1 << 13,        // float
-    vario_state_airspaceInfo = 1 << 14,    // Airspace_Info_t
-    vario_state_vertVelLazyBiep = 1 << 15, // float
+    vario_state_gpsHeading = 1 << 14,      // float
+    vario_state_airspaceInfo = 1 << 15,    // Airspace_Info_t
+    vario_state_vertVelLazyBiep = 1 << 16, // float
 } vario_state_member_t;
 
 typedef struct

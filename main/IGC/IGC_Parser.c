@@ -4,10 +4,10 @@
 #include <limits.h>
 #include <errno.h>
 #include <ctype.h>
+#include "Util.h"
 #include <math.h>
-#include "Screen/FIFO.h"
-#include "SDCard.h"
-#include "ErrorHandling.h"
+#include "FIFO.h"
+#include "../SDCard.h"
 
 #define MAX_LINELENGTH 256
 #define POINTS_MEAN_VARIO 5
@@ -15,141 +15,137 @@
 
 fifo_t vario_fifo;
 
-static esp_err_t str2int(int *out, const char *s)
+#define ERROR_CHECK(val) ({if(val != 0) return 1; })
+
+static int str2int(int *out, const char *s)
 {
     char *end;
     if (s[0] == '\0' || isspace((unsigned char)s[0]))
-        return ESP_ERR_INVALID_ARG;
+        return 1;
     errno = 0;
     long l = strtol(s, &end, 10);
     /* Both checks are needed because INT_MAX == LONG_MAX is possible. */
     // Owerflow
     if (l > INT_MAX || (errno == ERANGE && l == LONG_MAX))
-        return ESP_ERR_INVALID_ARG;
+        return 1;
     // Underflow
     if (l < INT_MIN || (errno == ERANGE && l == LONG_MIN))
-        return ESP_ERR_INVALID_ARG;
+        return 1;
     if (*end != '\0')
-        return ESP_ERR_INVALID_ARG;
+        return 1;
     *out = l;
-    return ESP_OK;
+    return 0;
 }
 
 static void sliceString(const char *oldString, char *newString, int start, int size)
 {
-    // strlcpy(newString, &oldString[start], size);
     strncpy(newString, &oldString[start], size);
+    newString[size] = '\0';
 }
 
-static esp_err_t sliceStringToInt(int *out, const char *stringIn, int start, int size)
+static int sliceStringToInt(int *out, const char *stringIn, int start, int size)
 {
     char buffer[size + 1];
     sliceString(stringIn, buffer, start, size);
     return str2int(out, buffer);
 }
 
-static esp_err_t floatFROMDMD(const char *dmd, float *valueRad)
+static int floatFROMDMD(const char *dmd, float *valueRad)
 {
     char tempBuffer[9];
     size_t sizeString = strlen(dmd);
     if (sizeString != 8 && sizeString != 9)
     {
         printf("Can't parse dmd\n");
-        return ESP_ERR_INVALID_SIZE;
+        return 1;
     }
     int degress, minutes, dminutes = 0;
     if (dmd[0] == 'S' || dmd[0] == 'N')
     {
         sliceString(dmd, tempBuffer, 1, 2);
-        ERROR_CHECKRETURN(str2int(&degress, tempBuffer));
+        ERROR_CHECK(str2int(&degress, tempBuffer));
         sliceString(dmd, tempBuffer, 3, 2);
-        ERROR_CHECKRETURN(str2int(&minutes, tempBuffer));
+        ERROR_CHECK(str2int(&minutes, tempBuffer));
         sliceString(dmd, tempBuffer, 5, 2);
-        ERROR_CHECKRETURN(str2int(&dminutes, tempBuffer));
+        ERROR_CHECK(str2int(&dminutes, tempBuffer));
     }
     else if (dmd[sizeString - 1] == 'S' || dmd[sizeString - 1] == 'N')
     {
         sliceString(dmd, tempBuffer, 0, 2);
-        ERROR_CHECKRETURN(str2int(&degress, tempBuffer));
+        ERROR_CHECK(str2int(&degress, tempBuffer));
         sliceString(dmd, tempBuffer, 2, 2);
-        ERROR_CHECKRETURN(str2int(&minutes, tempBuffer));
+        ERROR_CHECK(str2int(&minutes, tempBuffer));
         sliceString(dmd, tempBuffer, 4, 3);
-        ERROR_CHECKRETURN(str2int(&dminutes, tempBuffer));
+        ERROR_CHECK(str2int(&dminutes, tempBuffer));
     }
     else if (dmd[0] == 'W' || dmd[0] == 'E')
     {
         sliceString(dmd, tempBuffer, 1, 3);
-        ERROR_CHECKRETURN(str2int(&degress, tempBuffer));
+        ERROR_CHECK(str2int(&degress, tempBuffer));
         sliceString(dmd, tempBuffer, 4, 2);
-        ERROR_CHECKRETURN(str2int(&minutes, tempBuffer));
+        ERROR_CHECK(str2int(&minutes, tempBuffer));
         sliceString(dmd, tempBuffer, 6, 3);
-        ERROR_CHECKRETURN(str2int(&dminutes, tempBuffer));
+        ERROR_CHECK(str2int(&dminutes, tempBuffer));
     }
     else if (dmd[sizeString - 1] == 'W' || dmd[sizeString - 1] == 'E')
     {
         sliceString(dmd, tempBuffer, 0, 3);
-        ERROR_CHECKRETURN(str2int(&degress, tempBuffer));
+        ERROR_CHECK(str2int(&degress, tempBuffer));
         sliceString(dmd, tempBuffer, 3, 2);
-        ERROR_CHECKRETURN(str2int(&minutes, tempBuffer));
+        ERROR_CHECK(str2int(&minutes, tempBuffer));
         sliceString(dmd, tempBuffer, 5, 3);
-        ERROR_CHECKRETURN(str2int(&dminutes, tempBuffer));
-    }
-    else
-    {
-        printf("Cant parse Lat or Long\n");
-        return ESP_ERR_INVALID_ARG;
+        ERROR_CHECK(str2int(&dminutes, tempBuffer));
     }
     float r = (float)degress + (((float)minutes + ((float)dminutes / 1000.0f)) / 60.0f);
     if (dmd[0] == 'S' || dmd[0] == 'W' || dmd[sizeString - 1] == 'S' || dmd[sizeString - 1] == 'W')
         r *= -1;
     *valueRad = r;
-    return ESP_OK;
+    return 0;
 }
 
-static esp_err_t parseTime(const char *timeString, TimeIGC_t *date)
+static int parseTime(const char *timeString, TimeIGC_t *date)
 {
     if (strlen(timeString) != 6)
     {
         printf("Can't parse Time\n");
-        return ESP_ERR_INVALID_ARG;
     }
     int hour, minute, second;
     char tempBuffer[4];
     sliceString(timeString, tempBuffer, 0, 2);
-    ERROR_CHECKRETURN(str2int(&hour, tempBuffer));
+    ERROR_CHECK(str2int(&hour, tempBuffer));
     sliceString(timeString, tempBuffer, 2, 2);
-    ERROR_CHECKRETURN(str2int(&minute, tempBuffer));
+    ERROR_CHECK(str2int(&minute, tempBuffer));
     sliceString(timeString, tempBuffer, 4, 2);
-    ERROR_CHECKRETURN(str2int(&second, tempBuffer));
+    ERROR_CHECK(str2int(&second, tempBuffer));
     date->hour = hour;
     date->minute = minute;
     date->second = second;
-    return ESP_OK;
+    return 0;
 }
 
-static esp_err_t parseB(const char *line, Track_t *track, TrackPointIGC_t *point, IFieldPointIGC_t *IFields)
+static int parseB(const char *line, Track_t *track, TrackPointIGC_t *point, IFieldPointIGC_t *IFields)
 {
     if (point == NULL)
     {
         printf("Not enough Heap Space\n");
-        return ESP_ERR_NO_MEM;
+        return 1;
     }
     if (strlen(line) < 35)
     {
         printf("Line not enough long\n");
-        return ESP_ERR_INVALID_ARG;
+        return 1;
     }
 
     char tempBuffer[MAX_LINELENGTH];
     // Parse Latitude
     sliceString(line, tempBuffer, 7, 8);
-    ERROR_CHECKRETURN(floatFROMDMD(tempBuffer, &point->lat));
+    ERROR_CHECK(floatFROMDMD(tempBuffer, &point->lat));
     // Parse Longitude
     sliceString(line, tempBuffer, 15, 9);
-    ERROR_CHECKRETURN(floatFROMDMD(tempBuffer, &point->lon));
+    ERROR_CHECK(floatFROMDMD(tempBuffer, &point->lon));
     // Parse Time
     sliceString(line, tempBuffer, 1, 6);
-    ERROR_CHECKRETURN(parseTime(tempBuffer, &point->time));
+    ERROR_CHECK(parseTime(tempBuffer, &point->time));
     if (line[24] == 'A')
         point->FixValidity = true;
     else if (line[24] == 'V')
@@ -157,31 +153,30 @@ static esp_err_t parseB(const char *line, Track_t *track, TrackPointIGC_t *point
     else
     {
         printf("Invalid fix validity: %s", line);
-        return ESP_ERR_INVALID_ARG;
     }
     // Parse PressureAlt
-    ERROR_CHECKRETURN(sliceStringToInt(&point->pressureAlt, line, 25, 5));
+    ERROR_CHECK(sliceStringToInt(&point->pressureAlt, line, 25, 5));
     // Parse GNSSAlt
-    ERROR_CHECKRETURN(sliceStringToInt(&point->gnssAlt, line, 30, 5));
+    ERROR_CHECK(sliceStringToInt(&point->gnssAlt, line, 30, 5));
     if (track->IFields == NULL)
-        return ESP_OK;
+        return 0;
     for (size_t i = 0; i < track->sizeIFields; i++)
     {
         size_t sizeNumber = track->IFields[i].posEnd - track->IFields[i].posStart + 1;
         int field;
         int posStart = track->IFields[i].posStart - 1;
-        ERROR_CHECKRETURN(sliceStringToInt(&field, line, posStart, sizeNumber));
+        ERROR_CHECK(sliceStringToInt(&field, line, posStart, sizeNumber));
         IFields[i] = field;
     }
-    return ESP_OK;
+    return 0;
 }
 
-static esp_err_t getIFieldType(const char *Field, IFieldTypeIGC *type)
+static int getIFieldType(const char *Field, IFieldTypeIGC *type)
 {
     if (strlen(Field) != 3)
     {
         printf("Couldn't parse IField Type\n");
-        return ESP_ERR_INVALID_ARG;
+        return 1;
     }
     if (strcmp(Field, "FXA") == 0)
         *type = IGC_FXA;
@@ -197,27 +192,27 @@ static esp_err_t getIFieldType(const char *Field, IFieldTypeIGC *type)
     {
         *type = IGC_UNKNOWN;
     }
-    return ESP_OK;
+    return 0;
 }
 
-static esp_err_t parseI(const char *line, Track_t *track, bool mallocIFields)
+static int parseI(const char *line, Track_t *track, bool mallocIFields)
 {
     if (strlen(line) < 3)
     {
-        return ESP_ERR_INVALID_SIZE;
+        return 1;
     }
     if (!mallocIFields)
     {
         track->IFields = NULL;
         track->sizeIFields = 0;
-        return ESP_OK;
+        return 0;
     }
     int n;
-    ERROR_CHECKRETURN(sliceStringToInt(&n, line, 1, 2));
+    ERROR_CHECK(sliceStringToInt(&n, line, 1, 2));
     if (strlen(line) != n * 7 + 1 && strlen(line) != n * 7 + 5)
     {
         printf("Wrong I Field Length\n");
-        return ESP_ERR_INVALID_SIZE;
+        return 1;
     }
     if (track->IFields == NULL)
     {
@@ -225,7 +220,7 @@ static esp_err_t parseI(const char *line, Track_t *track, bool mallocIFields)
         if (track->IFields == NULL)
         {
             printf("Couldn't allocate memory for IFields\n");
-            return ESP_ERR_NO_MEM;
+            return 1;
         }
     }
     char buffer[4];
@@ -236,15 +231,15 @@ static esp_err_t parseI(const char *line, Track_t *track, bool mallocIFields)
         {
             int s = i * 7 + 3;
             int start, end;
-            ERROR_CHECKRETURN(sliceStringToInt(&start, line, s, 2));
-            ERROR_CHECKRETURN(sliceStringToInt(&end, line, s + 2, 2));
+            ERROR_CHECK(sliceStringToInt(&start, line, s, 2));
+            ERROR_CHECK(sliceStringToInt(&end, line, s + 2, 2));
             sliceString(line, buffer, s + 4, 3);
-            ERROR_CHECKRETURN(getIFieldType(buffer, &track->IFields[i].type));
+            ERROR_CHECK(getIFieldType(buffer, &track->IFields[i].type));
             track->IFields[i].posStart = start;
             track->IFields[i].posEnd = end;
         }
     }
-    return ESP_OK;
+    return 0;
 }
 
 void updateFlightStats(TrackPointIGC_t trackPoint, TrackPointIGC_t previousTrackPoint, Track_t *track)
@@ -270,21 +265,25 @@ void updateFlightStats(TrackPointIGC_t trackPoint, TrackPointIGC_t previousTrack
     }
     sumVertVel += vario;
     fifo_add(vario_fifo, &vario);
+    if (sumVertVel / (float)POINTS_MEAN_VARIO < -30.0f)
+    {
+        printf("Heree\n");
+    }
     track->flightStats.maxVelX = fmaxf(sumVertVel / (float)POINTS_MEAN_VARIO, track->flightStats.maxVelX);
     track->flightStats.minVelX = fminf(sumVertVel / (float)POINTS_MEAN_VARIO, track->flightStats.minVelX);
 }
 
-esp_err_t ParseIGCFile(Track_t *track, size_t maxSizeTrackPoints, FILE *igcFile, bool pointStackInit, bool parseIFields, char *fileName)
+int ParseIGCFile(Track_t *track, size_t maxSizeTrackPoints, FILE *igcFile, bool pointStackInit, bool parseIFields, char *fileName)
 {
     printf("Start parse IGC \n");
     if (igcFile == NULL)
-        return ESP_ERR_NOT_FOUND;
+        return 1;
     FILE *cachedF = openFile_sdcard("/cache", fileName, "w");
     if (cachedF == NULL)
     {
         char *erroName = strerror(errno);
         printf("Cached can't be created%s!\n", erroName);
-        return ESP_ERR_NOT_FOUND;
+        return 1;
     }
     char line[MAX_LINELENGTH];
     track->pointStackInit = pointStackInit;
@@ -297,7 +296,7 @@ esp_err_t ParseIGCFile(Track_t *track, size_t maxSizeTrackPoints, FILE *igcFile,
             if (line[0] == 'B')
                 track->totalPoints++;
             if (line[0] == 'I')
-                ERROR_CHECKRETURN(parseI(line, track, parseIFields));
+                ERROR_CHECK(parseI(line, track, parseIFields));
         }
     }
     fseek(igcFile, 0, SEEK_SET);
@@ -316,8 +315,8 @@ esp_err_t ParseIGCFile(Track_t *track, size_t maxSizeTrackPoints, FILE *igcFile,
 
     if (track->trackPoints == NULL)
     {
-        printf("Couldn't allocate TrackPoints or not on Stack\n");
-        return ESP_ERR_NO_MEM;
+        printf("Couldn' allocate TrackPoints or not on Stack\n");
+        return 1;
     }
 
     int k = track->totalPoints / maxSizeTrackPoints;
@@ -343,12 +342,12 @@ esp_err_t ParseIGCFile(Track_t *track, size_t maxSizeTrackPoints, FILE *igcFile,
                 if (parseIFields)
                 {
                     track->trackPoints[countAddedPoints].IFields = malloc(sizeof(IFieldPointIGC_t) * track->sizeIFields);
-                    ERROR_CHECKRETURN(parseB(line, track, &track->trackPoints[countAddedPoints], track->trackPoints[countAddedPoints].IFields));
+                    ERROR_CHECK(parseB(line, track, &track->trackPoints[countAddedPoints], track->trackPoints[countAddedPoints].IFields));
                 }
                 else
                 {
                     track->trackPoints[countAddedPoints].IFields = NULL;
-                    ERROR_CHECKRETURN(parseB(line, track, &track->trackPoints[countAddedPoints], IFields));
+                    ERROR_CHECK(parseB(line, track, &track->trackPoints[countAddedPoints], IFields));
                 }
                 updateFlightStats(track->trackPoints[countAddedPoints], tempPointPrev, track);
                 tempPointPrev = track->trackPoints[countAddedPoints];
@@ -356,7 +355,7 @@ esp_err_t ParseIGCFile(Track_t *track, size_t maxSizeTrackPoints, FILE *igcFile,
                 countAddedPoints++;
                 break;
             }
-            ERROR_CHECKRETURN(parseB(line, track, &tempPoint, IFields));
+            ERROR_CHECK(parseB(line, track, &tempPoint, IFields));
             updateFlightStats(tempPoint, tempPointPrev, track);
             tempPointPrev = tempPoint;
             countPoints++;
@@ -382,15 +381,15 @@ esp_err_t ParseIGCFile(Track_t *track, size_t maxSizeTrackPoints, FILE *igcFile,
     fwrite(&track->sizeIFields, sizeof(size_t), 1, cachedF);
     fclose(cachedF);
     printf("End parse IGC \n");
-    return ESP_OK;
+    return 0;
 }
 
-esp_err_t ParseIGCWithCached(Track_t *track, size_t maxSizeTrackPoints, FILE *igcFile, FILE *cachedFile, bool pointStackInit, bool parseIFields, char *fileName)
+int ParseIGCWithCached(Track_t *track, size_t maxSizeTrackPoints, FILE *igcFile, FILE *cachedFile, bool pointStackInit, bool parseIFields, char *fileName)
 {
     printf("Start parse IGC \n");
     char line[MAX_LINELENGTH];
     if (!igcFile || !cachedFile)
-        return ESP_ERR_NOT_FOUND;
+        return 1;
     fseek(cachedFile, 0, SEEK_END);
     long fileSize = ftell(cachedFile);
     if (fileSize != (7 * sizeof(float) + 2 * sizeof(size_t) + 1 * sizeof(int)))
@@ -429,7 +428,7 @@ esp_err_t ParseIGCWithCached(Track_t *track, size_t maxSizeTrackPoints, FILE *ig
     if (track->trackPoints == NULL)
     {
         printf("Couldn' allocate TrackPoints or not on Stack\n");
-        return ESP_ERR_NO_MEM;
+        return 1;
     }
 
     int k = track->totalPoints / maxSizeTrackPoints;
@@ -451,12 +450,12 @@ esp_err_t ParseIGCWithCached(Track_t *track, size_t maxSizeTrackPoints, FILE *ig
                 if (parseIFields)
                 {
                     track->trackPoints[countAddedPoints].IFields = malloc(sizeof(IFieldPointIGC_t) * track->sizeIFields);
-                    ERROR_CHECKRETURN(parseB(line, track, &track->trackPoints[countAddedPoints], track->trackPoints[countAddedPoints].IFields));
+                    ERROR_CHECK(parseB(line, track, &track->trackPoints[countAddedPoints], track->trackPoints[countAddedPoints].IFields));
                 }
                 else
                 {
                     track->trackPoints[countAddedPoints].IFields = NULL;
-                    ERROR_CHECKRETURN(parseB(line, track, &track->trackPoints[countAddedPoints], IFields));
+                    ERROR_CHECK(parseB(line, track, &track->trackPoints[countAddedPoints], IFields));
                 }
                 countPoints++;
                 countAddedPoints++;
@@ -469,34 +468,29 @@ esp_err_t ParseIGCWithCached(Track_t *track, size_t maxSizeTrackPoints, FILE *ig
         }
     }
     printf("End parse IGC \n");
-    return ESP_OK;
+    return 0;
 }
 
-esp_err_t FreeTrackFile(Track_t *track)
+int FreeTrackFile(Track_t *track)
 {
     if (track->IFields != NULL)
     {
         free(track->IFields);
-        track->IFields = NULL;
         for (size_t i = 0; i < track->sizeIFields; i++)
         {
-            free(track->trackPoints[i].IFields);
-            track->trackPoints[i].IFields = NULL;
+            free(&track->trackPoints[i].IFields);
         }
     }
     if (!track->pointStackInit)
-    {
         free(track->trackPoints);
-        track->trackPoints = NULL;
-    }
-    return ESP_OK;
+    return 0;
 }
 
-esp_err_t SetPointCountFromFile(Track_t *track, FILE *igcFile, size_t maxSizeTrackPoints)
+int SetPointCountFromFile(Track_t *track, FILE *igcFile, size_t maxSizeTrackPoints)
 {
     char line[MAX_LINELENGTH];
     if (igcFile == NULL)
-        return ESP_ERR_NOT_FOUND;
+        return 1;
     // Determine total points in track, so that we can sample the points in the second run
     track->totalPoints = 0;
     memset(track, 0, sizeof(Track_t));
@@ -509,7 +503,7 @@ esp_err_t SetPointCountFromFile(Track_t *track, FILE *igcFile, size_t maxSizeTra
         track->sizeTrackPoints = track->totalPoints;
     else
         track->sizeTrackPoints = maxSizeTrackPoints;
-    return ESP_OK;
+    return 0;
 }
 
 void Get_duration_diff(TimeIGC_t start_time, TimeIGC_t end_time, uint8_t *hours, uint8_t *minutes)

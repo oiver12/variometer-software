@@ -77,8 +77,17 @@ esp_err_t GetFlights(int startIndex, widget_Settings_linkedList *flightListHead)
     DIR *dir;
     struct dirent *ent;
     char *extension = ".igc";
-
-    if ((dir = opendir("/sdcard/IGCFlights")) != NULL)
+    char cwd[1024]; // buffer to store the current working directory path
+    if (getcwd(cwd, sizeof(cwd)) != NULL)
+    {
+        printf("Current working directory: %s\n", cwd);
+    }
+    else
+    {
+        perror("getcwd() error");
+        return 0;
+    }
+    if ((dir = opendir("sdcard/IGCFlights")) != NULL)
     {
         int index = 0;
         int tookenFiles = 0;

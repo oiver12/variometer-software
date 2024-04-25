@@ -23,6 +23,8 @@ SoundManager_Tone_t gpsFix_ToneArray[3] =
         {392, 500},
 };
 
+const static char *TAG = "DEVICE CONTEXT";
+
 vario_state_t vario_state;
 vario_settings_t vario_settings;
 paraglider_info_t paraglider_info;
@@ -39,6 +41,7 @@ SemaphoreHandle_t semaphore_flight_stats;
 
 static void updateFlightStatsTrackHistory(gps_t *gps, float vertVel)
 {
+    // ESP_LOGI("DEVICE", "Update Fligt Stats");
     int nextPoint = (flight_stats.frontPoint + 1) % MAX_TRACKPOINT_SIZE;
     if (nextPoint == flight_stats.rearPoint)
         flight_stats.rearPoint = (flight_stats.rearPoint + 1) % MAX_TRACKPOINT_SIZE;
@@ -99,11 +102,19 @@ static void device_state_gps_handle(void *event_handler_arg, esp_event_base_t ev
     {
     case GPS_UPDATE:
         gps = (gps_t *)event_data;
-        ESP_LOGI("GPS", "Sats IV: %i, Sats IU: %i, fix: %i", (int)gps->sats_in_view, (int)gps->sats_in_use, (int)gps->fix);
+        // ESP_LOGI("GPS", "Sats IV: %i, Sats IU: %i, fix: %i", (int)gps->sats_in_view, (int)gps->sats_in_use, (int)gps->fix);
         //  update vario state
         vario_state_set_member(&gps->altitude, vario_state_altitudeGPS);
         float speedGroundKMH = gps->speed * 3.6f;
         vario_state_set_member(&speedGroundKMH, vario_state_groundSpeed);
+        float lastLong;
+        float lastLat;
+        vario_state_get_member(&lastLong, vario_state_longitude, false);
+        vario_state_get_member(&lastLat, vario_state_latitude, false);
+        int gpsHeading = GET_BEARING(gps->latitude, gps->longitude, lastLat, lastLong);
+        vario_state_set_member(&gpsHeading, vario_state_gpsHeading);
+        vario_state_set_member(&gps->latitude, vario_state_latitude);
+        vario_state_set_member(&gps->longitude, vario_state_longitude);
         vario_state_set_member(gps, vario_state_gps_data);
         // update device state
         xSemaphoreTake(semaphore_device_state, portMAX_DELAY);
@@ -119,7 +130,7 @@ static void device_state_gps_handle(void *event_handler_arg, esp_event_base_t ev
                 .w = 100,
                 .h = 100,
                 .type = PopUpType_GPSFix,
-                .timeToDisplay = 3000,
+                .timeToDisplay = 1000,
             };
             ScreenManager_showPopUp(config);
             SoundManager_playToneArray(gpsFix_ToneArray, 3);
@@ -197,7 +208,7 @@ void vario_state_set_member(void *value, vario_state_member_t member)
         vario_state.groundSpeed = *((float *)value);
         break;
     case vario_state_vertVelLazy:
-        printf("Cant set vertVelLazy set vertVel, and then get vertVelLazy\n");
+        ESP_LOGW(TAG, "Cant set vertVelLazy set vertVel, and then get vertVelLazy");
         break;
     case vario_state_vertAcc:
         vario_state.vertAcc = *((float *)value);
@@ -236,11 +247,14 @@ void vario_state_set_member(void *value, vario_state_member_t member)
     case vario_state_latitude:
         vario_state.latitude = *((float *)value);
         break;
+    case vario_state_gpsHeading:
+        vario_state.gpsHeading = *((int *)value);
+        break;
     case vario_state_airspaceInfo:
         vario_state.airspaceInfo = *((Airspace_Info_t *)value);
         break;
     default:
-        printf(" Member von Vario State konnte nicht gefunden werden!\n");
+        ESP_LOGW(TAG, "Member von Vario State konnte nicht gefunden werden!");
         break;
     }
     vario_state.stateChange |= member;
@@ -293,6 +307,9 @@ bool vario_state_get_member(void *value, vario_state_member_t member, bool state
         break;
     case vario_state_latitude:
         *(float *)value = vario_state.latitude;
+        break;
+    case vario_state_gpsHeading:
+        *(int *)value = vario_state.gpsHeading;
         break;
     case vario_state_airspaceInfo:
         *(Airspace_Info_t *)value = vario_state.airspaceInfo;

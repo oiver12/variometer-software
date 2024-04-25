@@ -24,13 +24,18 @@
 #define GRAVITY_G 9.80665
 #define TEMPGRAD_L 0.0065
 
+typedef struct ACCMeas_t
+{
+    float accX;
+    float rotation[4];
+} ACCMeas_t;
+
 /* Kalman Filter */
 float dps310_stnd_height = 0.1298;    // Standardabweichung Höhenmessung
 float bmi088_stnd_acc = 0.2;          // Standardabweichung Beschleunigungssensor
 TaskHandle_t TaskKalmanFilter_Handle; // zum entsperen des Kalman Filter Task, wird von TaskMeasureHeight gemacht
 
 QueueHandle_t accQueue;
-// float rotationVario[4];
 
 float startPressure;
 float startTemperature;
@@ -194,9 +199,9 @@ static void TaskMeasureAcc(void *parameters)
     }
 
     QuaternionFilter_init();
-    // reset Rotation
-    rotation[0] = 1.0f;
-    rotation[1] = 0.0f;
+    // reset Rotation (on the head to start with)
+    rotation[0] = 0.0f;
+    rotation[1] = 1.0f;
     rotation[2] = 0.0f;
     rotation[3] = 0.0f;
 
@@ -257,7 +262,11 @@ static void TaskMeasureAcc(void *parameters)
         {
             counterAccX = 0;
             lastAccX = accX;
-            xQueueSend(accQueue, &accX, (TickType_t)0);
+
+            ACCMeas_t tempAccMeas;
+            tempAccMeas.accX = accX;
+            memcpy(tempAccMeas.rotation, rotation, sizeof(float) * 4);
+            xQueueSend(accQueue, &tempAccMeas, (TickType_t)0);
         }
         xTaskNotifyGiveIndexed(TaskKalmanFilter_Handle, 1);
 #ifdef ISSIMULATION
@@ -372,15 +381,14 @@ static void TaskKalmanFilter(void *parameters)
             flight_state.temperature = startTemperature;
         }
         xSemaphoreGive(pressure_temperature_Mutex);
-        volatile float acc = 0;
-        float rotation[4] = {1, 0, 0, 0};
+        float acc = 0;
 
-        float tempAcc;
-        volatile float accSum = 0;
-        volatile int accSize = 0;
+        ACCMeas_t tempAcc;
+        float accSum = 0;
+        int accSize = 0;
         while (xQueueReceive(accQueue, &tempAcc, (TickType_t)0) == pdTRUE)
         {
-            accSum += tempAcc;
+            accSum += tempAcc.accX;
             accSize++;
         }
         if (accSize == 0)
@@ -436,7 +444,7 @@ static void TaskKalmanFilter(void *parameters)
         if (countHeading % 10 == 0)
         {
             float roll, pitch, yaw;
-            Quaternion_get_RPY(rotation[0], rotation[1], rotation[2], rotation[3], &roll, &pitch, &yaw);
+            Quaternion_get_RPY(tempAcc.rotation[0], tempAcc.rotation[1], tempAcc.rotation[2], tempAcc.rotation[3], &roll, &pitch, &yaw);
             int heading = (int)yaw;
             while (heading > 360.0)
                 heading -= 360.0;
@@ -492,7 +500,7 @@ static void TaskKalmanFilter(void *parameters)
 void startMainTasks()
 {
     pressure_temperature_Mutex = xSemaphoreCreateMutex();
-    accQueue = xQueueCreate(10, sizeof(float));
+    accQueue = xQueueCreate(10, sizeof(ACCMeas_t));
 #ifdef ISSIMULATION
     xTaskCreate(TaskKalmanFilter, "Kalman Filter", 4 * 1024, NULL, TASK_KALMAN_PRIORITY, &TaskKalmanFilter_Handle);
     xTaskCreate(TaskMeasureHeight, "Measure Height", 4 * 1024, NULL, TASK_HEIGHT_PRIORITY, NULL);
