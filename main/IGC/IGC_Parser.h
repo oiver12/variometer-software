@@ -74,11 +74,11 @@ typedef struct Track_t
  * Mit parseIFields = false und pointStackInit = true wird also in dieser Funktion nicht allociert (in diesem Fall kann FreeTrackFile aufgerufen werden
  * es wird jedoch nicht passieren). Im anderen Fal muss FreeTrackFile aufgerufen werden
  */
-int ParseIGCFile(Track_t *track, size_t maxSizeTrackPoints, FILE *igcFile, bool pointStackInit, bool parseIFields, char *fileName);
-int ParseIGCWithCached(Track_t *track, size_t maxSizeTrackPoints, FILE *igcFile, FILE *cachedFile, bool pointStackInit, bool parseIFields, char *fileName);
+esp_err_t ParseIGCFile(Track_t *track, size_t maxSizeTrackPoints, FILE *igcFile, bool pointStackInit, bool parseIFields, char *fileName);
+esp_err_t ParseIGCWithCached(Track_t *track, size_t maxSizeTrackPoints, FILE *igcFile, FILE *cachedFile, bool pointStackInit, bool parseIFields, char *fileName);
 // TODO: mit parseIFields = true funktioniert es nicht!!!!!!
-int FreeTrackFile(Track_t *track);
-int SetPointCountFromFile(Track_t *track, FILE *igcFile, size_t maxSizeTrackPoints);
+esp_err_t FreeTrackFile(Track_t *track);
+esp_err_t SetPointCountFromFile(Track_t *track, FILE *igcFile, size_t maxSizeTrackPoints);
 void Get_duration_diff(TimeIGC_t start_time, TimeIGC_t end_time, uint8_t *hours, uint8_t *minutes);
 
 #endif

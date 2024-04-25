@@ -246,7 +246,7 @@ void SettingsManager__enter_press()
             else if (screenSettingsInstance.currPage == Settings_Page_Flights)
             {
                 screenSettingsInstance.currPage = Settings_Page_FlightStatistics;
-                xTaskCreate(vario_display_FlightStatistics, "IGC Show", 1024 * 3, (void *)((FlightList_Widget_Data *)screenSettingsInstance.hoveredField->data.extr_data)->FlightName, 3, NULL);
+                xTaskCreate(vario_display_FlightStatistics, "IGC Show", 1024 * 3, (void *)((FlightList_Widget_Data *)screenSettingsInstance.hoveredField->data.extr_data)->FlightName, 10, NULL);
                 return;
             }
             // select field
