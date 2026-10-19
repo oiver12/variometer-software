@@ -1,0 +1,7 @@
+* text=auto
+main/nkolban/** linguist-vendored=true
+main/Screen/E_Ink/** linguist-vendored=true
+main/Screen/FIFO.[ch] linguist-vendored=true
+main/nmea_parser.[ch] linguist-vendored=true
+main/crc/** linguist-vendored=true
+main/Kalman/Quaternion/** linguist-vendored=true

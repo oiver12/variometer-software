@@ -1,0 +1,78 @@
+Third-party code and reference inventory
+========================================
+
+Oliver Baumgartner's original software is licensed under MIT (see LICENSE).
+This file does not relicense third-party material. The linked GPL FIFO retains
+its GPL-3.0-or-later obligations; the combined firmware is not uniformly MIT.
+Enclosure/CAD includes work by Oliver and his brother; contributor permissions
+and hardware/CAD licensing are a separate decision.
+
+Firmware (paths relative to the variometer-software repository)
+
+* main/nkolban/: Neil Kolban / esp32-snippets and contributors.
+  https://github.com/nkolban/esp32-snippets
+  Upstream LICENSE is Apache-2.0; restored at main/nkolban/LICENSE.
+  The exact imported upstream revision is not recorded and should be confirmed.
+  HIDTypes.h also retains its mbed.org MIT notice.
+
+* main/Screen/E_Ink/: Waveshare EPD_3in7, GUI_Paint and font assets.
+  https://github.com/waveshareteam/e-Paper
+  Driver/GUI headers contain permissive permission notices; retained in place.
+  Some font tables identify Courier New and have no standalone license in this
+  snapshot. Confirm bitmap/font provenance and redistribution terms before release.
+  The same applies to copies in the Linux and Windows screen simulators.
+
+* main/Screen/FIFO.c and FIFO.h: Jesus Ruben Santa Anna Zamudio / Geek Factory,
+  copyright 2014. Source notices specify GPL version 3 or any later version.
+  https://www.geekfactory.mx/
+  Full text: LICENSES/GPL-3.0.txt. Copies also exist in both screen simulators.
+
+* main/nmea_parser.c and .h: Espressif Systems. Source headers specify Apache-2.0.
+  Full text: LICENSES/Apache-2.0.txt. Preserve copyright and modification notices.
+
+* main/crc/crc.c and .h: Michael Barr, copyright 2000. The source dedicates this
+  implementation to the public domain, requiring that its notice remain intact.
+
+* main/IGC/IGC_Parser.h explicitly credits a translation from ezgliding/goigc.
+  https://github.com/ezgliding/goigc
+  Upstream LICENSE is Apache-2.0; included at main/IGC/LICENSE-goigc.
+  Confirm the adapted revision and which parts were translated.
+
+* main/Kalman/Quaternion/SensorFusion.h references Paul Stoffregen's
+  NXPMotionSense/SensorFusion.cpp. The local header and routines require an
+  upstream provenance/license review. Do not label them as original MIT code.
+  https://github.com/PaulStoffregen/NXPMotionSense
+
+* main/Kalman/matrix.* and cholesky.* credit Efficient Java Matrix Library (EJML).
+  Confirm whether these are ports, adaptations, or references and recover the
+  applicable historical license/copyright notices.
+  https://github.com/lessthanoptimal/ejml
+
+* main/compass.c references fhorinek/SkyDrop. Confirm the source revision and
+  whether code was adapted before assigning redistribution terms.
+  https://github.com/fhorinek/SkyDrop
+
+Monorepo dependencies
+
+* Simulation/FreeRTOS/: FreeRTOS/Amazon and bundled third parties. FreeRTOS kernel
+  files retain MIT notices; FreeRTOS-Plus includes many separately licensed
+  components (including GPL material). All existing LICENSE/COPYING/NOTICE files
+  are preserved. Percepio's trace recorder retains Apache-2.0 notices/license.
+  This directory is vendored; it is not all project-authored code or all MIT.
+
+* Screen_Simulator/.../cJSON.c and cJSON.h: Dave Gamble and cJSON contributors,
+  MIT permission/copyright notices retained in the source.
+
+* SDL libraries used by desktop simulators: Sam Lantinga and contributors;
+  preserve the notices accompanying any distributed SDL binaries/source.
+
+* VariometerAnalysis/FormsVariometerAnalysis/packages/: packaged .NET
+  dependencies with their own license files, preserved in place.
+
+* Hardware/Library/ and Hardware/Komponenten/: component symbols/footprints,
+  models and supplier material. These are not covered by any future license
+  for original project code; identify individual sources before redistribution.
+
+License texts added during preparation were checked against upstream LICENSE
+metadata or existing source notices. They do not establish an unrecorded import
+version or cure missing provenance. No source copyright notices were removed.

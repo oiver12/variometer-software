@@ -6,7 +6,9 @@
 #include "Watchdog/Watchdog.h"
 #include "ErrorHandling.h"
 #include "vario_config.h"
+#ifdef ISSIMULATION
 #include "SDLHelper/SDL_helper.h"
+#endif
 
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
