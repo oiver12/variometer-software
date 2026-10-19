@@ -106,6 +106,7 @@ float get_Value_Text(WidgetContentType contentType, char *const buffer, size_t b
         break;
     case WidgetContent_Pressure:
         returnValue = vario_state_get_member(&temp, vario_state_pressure, shouldReset);
+        temp /= 100.0f; // Sensor state is in Pa; this widget is labelled hPa.
         break;
     case WidgetContent_Temperature:
         returnValue = vario_state_get_member(&temp, vario_state_temperature, shouldReset);

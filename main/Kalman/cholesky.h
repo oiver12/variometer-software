@@ -1,3 +1,9 @@
+/* Adapted from Markus Mayer and contributors, kalman-clib.
+ * Copyright (c) 2014-2015 Markus Mayer and contributors.
+ * MIT license: LICENSE-kalman-clib. Existing EJML references retained.
+ * https://github.com/sunsided/kalman-clib
+ */
+
 #ifndef _CHOLESKY_H_
 #define _CHOLESKY_H_
 

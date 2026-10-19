@@ -18,9 +18,11 @@ Firmware (paths relative to the variometer-software repository)
 * main/Screen/E_Ink/: Waveshare EPD_3in7, GUI_Paint and font assets.
   https://github.com/waveshareteam/e-Paper
   Driver/GUI headers contain permissive permission notices; retained in place.
-  Some font tables identify Courier New and have no standalone license in this
-  snapshot. Confirm bitmap/font provenance and redistribution terms before release.
-  The same applies to copies in the Linux and Windows screen simulators.
+  The author confirms the driver, GUI and fonts came from the Waveshare package,
+  with possible local modifications. Font8/12/16/20/24 bitmap bytes match the
+  upstream tables; their STMicroelectronics 2014 BSD-style notices were restored
+  in firmware and both screen simulators. See docs/third-party-provenance.json
+  in VariometerV2 for the comparison and source links.
 
 * main/Screen/FIFO.c and FIFO.h: Jesus Ruben Santa Anna Zamudio / Geek Factory,
   copyright 2014. Source notices specify GPL version 3 or any later version.
@@ -38,18 +40,23 @@ Firmware (paths relative to the variometer-software repository)
   Upstream LICENSE is Apache-2.0; included at main/IGC/LICENSE-goigc.
   Confirm the adapted revision and which parts were translated.
 
-* main/Kalman/Quaternion/SensorFusion.h references Paul Stoffregen's
-  NXPMotionSense/SensorFusion.cpp. The local header and routines require an
-  upstream provenance/license review. Do not label them as original MIT code.
+* main/Kalman/Quaternion/: adapted Freescale Semiconductor sensor fusion,
+  distributed via Paul Stoffregen's NXPMotionSense. The matrix implementation
+  matches after whitespace/comments are removed; shared fusion routines and
+  constants identify the same source. Original 2014 Freescale BSD-3-Clause
+  notices restored in SensorFusion.c/.h and matrixSensorFusion.c.
   https://github.com/PaulStoffregen/NXPMotionSense
 
-* main/Kalman/matrix.* and cholesky.* credit Efficient Java Matrix Library (EJML).
-  Confirm whether these are ports, adaptations, or references and recover the
-  applicable historical license/copyright notices.
+* main/Kalman/matrix.* and cholesky.*: matching implementations in Markus
+  Mayer and contributors' kalman-clib (MIT), which itself credits EJML ports.
+  MIT text restored at main/Kalman/LICENSE-kalman-clib; original EJML references
+  retained. The exact imported revision is not recorded.
+  https://github.com/sunsided/kalman-clib
   https://github.com/lessthanoptimal/ejml
 
-* main/compass.c references fhorinek/SkyDrop. Confirm the source revision and
-  whether code was adapted before assigning redistribution terms.
+* main/compass.c references fhorinek/SkyDrop. That upstream URL is currently
+  unavailable; the author does not remember the import details. The source
+  reference is retained and the applicable provenance remains unresolved.
   https://github.com/fhorinek/SkyDrop
 
 Monorepo dependencies

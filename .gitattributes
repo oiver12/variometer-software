@@ -5,3 +5,5 @@ main/Screen/FIFO.[ch] linguist-vendored=true
 main/nmea_parser.[ch] linguist-vendored=true
 main/crc/** linguist-vendored=true
 main/Kalman/Quaternion/** linguist-vendored=true
+main/Kalman/matrix.[ch] linguist-vendored=true
+main/Kalman/cholesky.[ch] linguist-vendored=true
